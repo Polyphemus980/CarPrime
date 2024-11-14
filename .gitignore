@@ -1,0 +1,5 @@
+﻿.idea/*
+CarPrime/bin/*
+CarPrime/obj/*
+CarPrime/appsettings.json
+CarPrime/appsettings.Development.json
