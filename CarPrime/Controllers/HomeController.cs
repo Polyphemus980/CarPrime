@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 namespace CarPrime.Controllers;
 using Data;
-using Models;
 
 [ApiController]
 [Route("")]
