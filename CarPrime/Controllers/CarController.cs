@@ -13,6 +13,13 @@ public class CarController : Controller
     {
         _context = context;
     }
+    
+    [HttpGet]
+    [Route("")]
+    public IActionResult Index()
+    {
+        return Ok("Hello World");
+    }
     [HttpPost]
     public async Task<IActionResult> InsertCar()
     {
