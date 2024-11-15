@@ -89,5 +89,10 @@ jobs:
           name: migration-sql-script
 
       - name: Run SQL Migrations on Azure SQL Database
-        run: sqlcmd -S "${{ secrets.AZURE_SQL_CONNECTIONSTRING }}" -i migrations.sql
-        
+        run: sqlcmd -S "${DB_SERVER},${DB_PORT}" -d "${DB_NAME}" -U "${DB_USER}" -P "${DB_PASSWORD}" -i migrations.sql
+        env:
+          DB_SERVER: ${{ secrets.DB_SERVER }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
