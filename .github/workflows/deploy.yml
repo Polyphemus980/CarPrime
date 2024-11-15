@@ -53,7 +53,7 @@ jobs:
     environment:
       name: 'Development'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
+    
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
@@ -67,3 +67,11 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+      - name: Run EF Migrations
+        run: |
+          echo "Running EF Migrations"
+          dotnet ef database update --connection "$DATABASE_CONNECTION_STRING"
+        env:
+          DATABASE_CONNECTION_STRING: ${{ secrets.AZURE_SQL_CONNECTIONSTRING }}
+        
