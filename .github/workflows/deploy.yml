@@ -43,7 +43,7 @@ jobs:
       - name: Generate EF Core Migration Script
         run: |
           pwd
-          lsd
+          ls
           dotnet ef migrations script --idempotent --output ./migrations.sql --project CarPrime.csproj
 
       - name: Upload migration SQL script
