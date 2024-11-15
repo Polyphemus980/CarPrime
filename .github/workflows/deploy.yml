@@ -44,7 +44,7 @@ jobs:
         run: |
           pwd
           ls
-          dotnet ef migrations script --idempotent --output ./migrations.sql --project CarPrime.csproj
+          dotnet ef migrations script --idempotent --output ./migrations.sql --project ./CarPrime/CarPrime.csproj
 
       - name: Upload migration SQL script
         uses: actions/upload-artifact@v4
