@@ -70,7 +70,6 @@ jobs:
 
       - name: Run EF Migrations
         run: |
-          dotnet tool install --global dotnet-ef
           dotnet tool restore
           dotnet ef database update --project ./CarPrime/CarPrime.csproj --connection "$DATABASE_CONNECTION_STRING"
         env:
