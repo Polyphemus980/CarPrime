@@ -70,7 +70,8 @@ jobs:
 
       - name: Run EF Migrations
         run: |
-          echo "Running EF Migrations"
+          dotnet tool install --global dotnet-ef
+          dotnet tool restore
           dotnet ef database update --connection "$DATABASE_CONNECTION_STRING"
         env:
           DATABASE_CONNECTION_STRING: ${{ secrets.AZURE_SQL_CONNECTIONSTRING }}
