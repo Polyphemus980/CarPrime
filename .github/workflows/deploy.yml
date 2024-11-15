@@ -72,7 +72,7 @@ jobs:
         run: |
           cd ../ 
           pwd
-          dotnet tool restore -d 
+          dotnet tool restore --verbosity diag
           dotnet ef database update --project ./CarPrime/CarPrime.csproj --connection "$DATABASE_CONNECTION_STRING"
         env:
           DATABASE_CONNECTION_STRING: ${{ secrets.AZURE_SQL_CONNECTIONSTRING }}
