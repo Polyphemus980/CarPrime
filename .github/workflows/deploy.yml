@@ -1,9 +1,10 @@
 ﻿name: Build and deploy ASP.Net Core app to an Azure Web App
 
 env:
-  AZURE_WEBAPP_NAME: CarPrimeApi    
-  AZURE_WEBAPP_PACKAGE_PATH: '.'      
-  DOTNET_VERSION: '8.x'                 
+  AZURE_WEBAPP_NAME: CarPrimeApi
+  AZURE_WEBAPP_PACKAGE_PATH: '.'
+  DOTNET_VERSION: '8.x'
+  DATABASE_CONNECTION_STRING: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
 
 on:
   push:
@@ -35,6 +36,15 @@ jobs:
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
+
+      - name: Generate EF Core Migration Script
+        run: dotnet ef migrations script --idempotent --output ./migrations.sql --project CarPrime.csproj
+
+      - name: Upload migration SQL script
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-sql-script
+          path: ./migrations.sql
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
@@ -68,12 +78,14 @@ jobs:
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
-      - name: Run EF Migrations
+      - name: Download migration SQL script
+        uses: actions/download-artifact@v4
+        with:
+          name: migration-sql-script
+
+      - name: Run SQL Migrations on Azure SQL Database
         run: |
-          cd ../ 
-          pwd
-          dotnet tool restore --verbosity diag
-          dotnet ef database update --project ./CarPrime/CarPrime.csproj --connection "$DATABASE_CONNECTION_STRING"
+          sqlcmd -S "${{ secrets.AZURE_SQL_CONNECTION_STRING }}" -i migrations.sql
         env:
-          DATABASE_CONNECTION_STRING: ${{ secrets.AZURE_SQL_CONNECTIONSTRING }}
+          AZURE_SQL_CONNECTION_STRING: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
         
