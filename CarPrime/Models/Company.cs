@@ -8,4 +8,5 @@ public class Company
     public string Name { get; set; }
     public string ApiUrl { get; set; }
     private List<Offer> Offers { get; set; }
+    public int TestField { get; set; }
 }
