@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
 namespace CarPrime.Controllers;
 using Data;
 using Models;
@@ -15,7 +17,7 @@ public class CarController : Controller
     }
     
     [HttpPost]
-    public async Task<IActionResult> InsertCar()
+    public async Task<IActionResult> InsertCarModel()
     {
         CarModel model = new CarModel
         {
@@ -28,5 +30,12 @@ public class CarController : Controller
         await _context.SaveChangesAsync();
 
         return Ok("Car model inserted succesfully");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetModels()
+    {
+        var carModels = await _context.CarModels.ToListAsync();
+        return Ok(carModels);
     }
 }
