@@ -9,11 +9,13 @@ using Models;
 [Route("[controller]")]
 public class CarController : Controller
 {
+    private readonly ILogger<CarController> _logger;
     private readonly ApplicationDbContext _context;
 
-    public CarController(ApplicationDbContext context)
+    public CarController(ApplicationDbContext context,ILogger<CarController> logger)
     {
         _context = context;
+        _logger = logger;
     }
     
     [HttpPost]
@@ -35,7 +37,9 @@ public class CarController : Controller
     [HttpGet]
     public async Task<IActionResult> GetModels()
     {
+        _logger.LogInformation("Get action called.");
         var carModels = await _context.CarModels.ToListAsync();
+        _logger.LogInformation("Cars got action called.");
         return Ok(carModels);
     }
 }
