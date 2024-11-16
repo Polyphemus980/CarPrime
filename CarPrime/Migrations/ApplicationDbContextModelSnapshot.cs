@@ -80,9 +80,6 @@ namespace CarPrime.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TestField")
-                        .HasColumnType("int");
-
                     b.HasKey("CompanyId");
 
                     b.ToTable("Companies");
