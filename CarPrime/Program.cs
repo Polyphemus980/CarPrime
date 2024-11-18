@@ -1,4 +1,5 @@
 using CarPrime.Data;
+using CarPrime.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +18,9 @@ builder.Services.AddSwaggerGen();
 var connectionString = Environment.GetEnvironmentVariable("SQLAZURECONNSTR_AZURE_SQL_CONNECTIONSTRING") 
                        ?? builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseAzureSql(connectionString));
-
+var emailApiKey = Environment.GetEnvironmentVariable("SendGridApiKey") ?? builder.Configuration["SendGrid:ApiKey"];
+if (emailApiKey != null) 
+    builder.Services.AddSingleton(new EmailService(emailApiKey));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
