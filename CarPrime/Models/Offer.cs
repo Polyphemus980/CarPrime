@@ -15,8 +15,11 @@ public class Offer
     public int CompanyId { get; set; }
     [Required]
     public Company Company { get; set; }
-    [Column(TypeName="money")]
+    
+    [Required] [Column(TypeName="money")]
     public decimal InsurancePrize { get; set; }
+    [Required]
+    public decimal RentPrize { get; set; }
     [Required]
     public DateTime CreatedAt { get; set; }
     public bool IsDeleted { get; set; }
