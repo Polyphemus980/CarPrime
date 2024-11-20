@@ -11,6 +11,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//Cors config for allowing front end to make requests to this api
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontEnd",
+        corsBuilder => corsBuilder.WithOrigins("https://ashy-field-0c4ba1803.5.azurestaticapps.net")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
 //Database config
 var connectionString = Environment.GetEnvironmentVariable("SQLAZURECONNSTR_AZURE_SQL_CONNECTIONSTRING") 
                        ?? builder.Configuration.GetConnectionString("DefaultConnection");
@@ -52,9 +61,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.UseCors("AllowFrontEnd");
 app.Run();
