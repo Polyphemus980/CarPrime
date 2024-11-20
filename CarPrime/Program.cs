@@ -1,29 +1,51 @@
+using System.Text;
+using CarPrime.Configurations;
 using CarPrime.Data;
 using CarPrime.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddLogging(logging =>
-{
-    logging.ClearProviders();
-    logging.AddConsole(); // Adds console logging
-    logging.AddDebug();   // Adds debug logging
-});
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//Database config
 var connectionString = Environment.GetEnvironmentVariable("SQLAZURECONNSTR_AZURE_SQL_CONNECTIONSTRING") 
                        ?? builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseAzureSql(connectionString));
-var emailApiKey = Environment.GetEnvironmentVariable("SendGridApiKey") ?? builder.Configuration["SendGrid:ApiKey"];
-if (emailApiKey != null) 
-    builder.Services.AddSingleton(new EmailService(emailApiKey));
+
+//Email sender config
+builder.Services.Configure<SendGridSettings>(builder.Configuration.GetSection("SendGrid"));
+builder.Services.AddSingleton<IEmailService,EmailService>();
+
+//CustomerService
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+ 
+//Google authentication config
+var secretKey = builder.Configuration["Jwt:SecretKey"];
+Console.WriteLine(secretKey);
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["Jwt:MyDomainUrl"],  
+        ValidateAudience = false,
+        //TODO: Validate audience once front-end is deployed
+        //ValidateAudience = true, 
+        //ValidAudience = configuration[front-end-url],   
+        ValidateLifetime = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+    };
+});
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

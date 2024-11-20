@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CarPrime.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarPrime.Controllers;
@@ -7,15 +8,17 @@ using Models;
 
 [ApiController]
 [Route("[controller]")]
-public class CarController : Controller
+public class CarController : ControllerBase
 {
     private readonly ILogger<CarController> _logger;
     private readonly ApplicationDbContext _context;
+    private readonly IEmailService _emailService;
 
-    public CarController(ApplicationDbContext context,ILogger<CarController> logger)
+    public CarController(ApplicationDbContext context,ILogger<CarController> logger,IEmailService emailService)
     {
         _context = context;
         _logger = logger;
+        _emailService = emailService;
     }
     
     [HttpPost]
@@ -26,8 +29,7 @@ public class CarController : Controller
             Brand = "Toyota",
             Name = "Verso"
         };
-
-        // Add the product to the database
+        
         _context.CarModels.Add(model);
         await _context.SaveChangesAsync();
 

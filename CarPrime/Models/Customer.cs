@@ -13,7 +13,7 @@ public class Customer
 
     [Required] public string LastName { get; set; }
 
-    [Required] public DateTime LicenceIssuedDate;
+    [Required] public DateTime LicenceIssuedDate { get; set; }
 
     [Required] public string Country { get; set; }
 
