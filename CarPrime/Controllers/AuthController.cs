@@ -37,7 +37,7 @@ public class AuthController : ControllerBase
             var customer = await _customerService.GetCustomerByEmailAsync(email);
             if (customer == null)
             {
-                return Ok(new { requiresAdditionalInfo = true, email });
+                return Ok(new { requiresAdditionalInfo = true, email = payload.Email });
             }
             var token = GenerateJwt(email);
             return Ok(new {Token = token});
@@ -56,9 +56,9 @@ public class AuthController : ControllerBase
             new Claim(JwtRegisteredClaimNames.Sub, email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
-        var secretKey = Environment.GetEnvironmentVariable("JwtSecretKey") ?? _configuration["Jwt:SecretKey"];
+        var secretKey = _configuration["Jwt:SecretKey"];
         
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(secretKey)));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:MyDomainUrl"],
@@ -72,7 +72,6 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] CustomerRegistrationRequest customerData)
     {
-        //TODO: REGISTER
         var customer = await _customerService.GetCustomerByEmailAsync(customerData.Email);
         if (customer != null)
         {
