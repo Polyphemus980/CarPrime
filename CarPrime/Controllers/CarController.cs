@@ -13,12 +13,14 @@ public class CarController : ControllerBase
     private readonly ILogger<CarController> _logger;
     private readonly ApplicationDbContext _context;
     private readonly IEmailService _emailService;
+    private readonly ICustomerService _customerService;
 
-    public CarController(ApplicationDbContext context, ILogger<CarController> logger, IEmailService emailService)
+    public CarController(ApplicationDbContext context, ILogger<CarController> logger, IEmailService emailService, ICustomerService customerService)
     {
         _context = context;
         _logger = logger;
         _emailService = emailService;
+        _customerService = customerService;
     }
     
     [HttpPost]
@@ -37,24 +39,70 @@ public class CarController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetModels()
+    public async Task<IActionResult> GetCars()
     {
         _logger.LogInformation("Get action called.");
-        var carModels = await _context.CarModels.ToListAsync();
+        var frontCars = await _context.Cars
+            .GroupJoin(_context.Leases, car => car.CarId, lease => lease.Offer.CarId, (car, leases) => new { car, leases })
+            // dostępne są te samochody, dla których nie ma aktywnych wypożyczeń
+            .Select(arg => new { arg.car, status = arg.leases.All(lease => lease.EndedAt != null) ? "available" : "not available" })
+            .Select(arg => new FrontCar(arg.car.CarId, arg.car.Model.Brand, arg.car.Model.Name, arg.car.ManufactureYear, arg.status))
+            .ToListAsync();
         _logger.LogInformation("Cars got action called.");
-        return Ok(carModels);
+        return Ok(frontCars);
     }
+    
+    public record FrontCar(int Id, string Brand, string Name, DateTime Year, string Status);
 
     [HttpPost("/Car/{id:Int}/rent")]
     public async Task<IActionResult> RentCar([FromRoute] int id, [FromBody] CustomerData customerData)
     {
         _logger.LogInformation("Customer {customer} wants to rent car wth id {id}", customerData, id);
-        var car = await _context.CarModels.FindAsync(id);
+        var car = await _context.Cars.FindAsync(id);
         if (car == null)
-            return NotFound();
+            return NotFound("Car not found");
+        
+        var customer = await _customerService.GetCustomerByEmailAsync(customerData.Email);
+        if (customer == null)
+        {
+            customer = new Customer
+            {
+                FirstName = customerData.FirstName,
+                LastName = customerData.LastName,
+                Email = customerData.Email,
+                CreatedAt = DateTime.Now,
+                Country = "Unknown",
+                City = "Unknown",
+                Address = "Unknown",
+            };
+            await _customerService.AddCustomerAsync(customer);
+        }
+        // company chyba też będzie musiało być przekazywane w requeście; lub jakiś sposób identyfikacji z id
+        var company = await _context.Companies.FirstOrDefaultAsync(); 
+        if (company == null)
+        {
+            company = new Company
+            {
+                Name = "Default Company",
+                ApiUrl = "localhost:2137",
+            };
+            await _context.Companies.AddAsync(company);
+        }
 
-        //TODO
-        return Ok("Car rented successfully"); 
+        var offer = await CreateOffer(car, customer, company);
+        _logger.LogInformation("New offer created: {offer}", offer);
+
+        var lease = new Lease
+        {
+            Offer = offer,
+            Leaser = customer,
+            CreatedAt = DateTime.Now,
+        };
+        await _context.Leases.AddAsync(lease);
+        
+        await _context.SaveChangesAsync();
+        
+        return Ok("Car rented successfully."); 
     }
     
     public record CustomerData(string FirstName, string LastName, string Email);
@@ -73,16 +121,16 @@ public class CarController : ControllerBase
     
     
     
-    private async Task<IActionResult> CreateOffer(Car car, Customer customer, Company company)
+    private async Task<Offer> CreateOffer(Car car, Customer customer, Company company)
     {
         var offer = new Offer
         {
             Customer = customer,
             Car = car,
-            Company = company
+            Company = company,
+            CreatedAt = DateTime.Now,
         };
-        _context.Offers.Add(offer);
-        await _context.SaveChangesAsync();
-        return Ok(offer);
+        await _context.Offers.AddAsync(offer);
+        return offer;
     }
 }
