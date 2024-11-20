@@ -1,5 +1,5 @@
 {
-  "homepage" : "https://Polyphemus980.github.io/CarPrime",
+  "homepage": "https://Polyphemus980.github.io/CarPrime",
   "name": "car-rental-app",
   "version": "0.1.0",
   "private": true,
@@ -39,5 +39,8 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net"
+  "proxy": "https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net",
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+  }
 }
