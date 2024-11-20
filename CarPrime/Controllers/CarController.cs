@@ -14,7 +14,7 @@ public class CarController : ControllerBase
     private readonly ApplicationDbContext _context;
     private readonly IEmailService _emailService;
 
-    public CarController(ApplicationDbContext context,ILogger<CarController> logger,IEmailService emailService)
+    public CarController(ApplicationDbContext context, ILogger<CarController> logger, IEmailService emailService)
     {
         _context = context;
         _logger = logger;
@@ -33,7 +33,7 @@ public class CarController : ControllerBase
         _context.CarModels.Add(model);
         await _context.SaveChangesAsync();
 
-        return Ok("Car model inserted succesfully");
+        return Ok("Car model inserted successfully");
     }
 
     [HttpGet]
@@ -43,5 +43,46 @@ public class CarController : ControllerBase
         var carModels = await _context.CarModels.ToListAsync();
         _logger.LogInformation("Cars got action called.");
         return Ok(carModels);
+    }
+
+    [HttpPost("/Car/{id:Int}/rent")]
+    public async Task<IActionResult> RentCar([FromRoute] int id, [FromBody] CustomerData customerData)
+    {
+        _logger.LogInformation("Customer {customer} wants to rent car wth id {id}", customerData, id);
+        var car = await _context.CarModels.FindAsync(id);
+        if (car == null)
+            return NotFound();
+
+        //TODO
+        return Ok("Car rented successfully"); 
+    }
+    
+    public record CustomerData(string FirstName, string LastName, string Email);
+
+    [HttpGet]
+    [Route("/Car/{id:int}")]
+    public async Task<IActionResult> GetModelById([FromRoute] int id)
+    {
+        _logger.LogInformation("Get action called with id {id}.", id);
+        var carModel = await _context.CarModels.FindAsync(id);
+        if (carModel == null)
+            return NotFound();
+        return Ok(carModel);
+    }
+
+    
+    
+    
+    private async Task<IActionResult> CreateOffer(Car car, Customer customer, Company company)
+    {
+        var offer = new Offer
+        {
+            Customer = customer,
+            Car = car,
+            Company = company
+        };
+        _context.Offers.Add(offer);
+        await _context.SaveChangesAsync();
+        return Ok(offer);
     }
 }
