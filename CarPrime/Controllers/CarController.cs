@@ -1,4 +1,5 @@
-﻿using CarPrime.Services;
+﻿using System.Globalization;
+using CarPrime.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -46,14 +47,14 @@ public class CarController : ControllerBase
             .GroupJoin(_context.Leases, car => car.CarId, lease => lease.Offer.CarId, (car, leases) => new { car, leases })
             // dostępne są te samochody, dla których nie ma aktywnych wypożyczeń
             .Select(arg => new { arg.car, status = arg.leases.All(lease => lease.EndedAt != null) ? "available" : "not available" })
-            .Select(arg => new FrontCar(arg.car.CarId, arg.car.Model.Brand, arg.car.Model.Name, arg.car.ManufactureYear, arg.status))
+            .Select(arg => new FrontCar(arg.car.CarId, arg.car.Model.Brand, arg.car.Model.Name, arg.car.ManufactureYear.Year, arg.status))
             .ToListAsync();
         _logger.LogInformation("Cars got action called.");
         return Ok(frontCars);
     }
     
-    public record FrontCar(int Id, string Brand, string Name, DateTime Year, string Status);
-
+    public record FrontCar(int Id, string Brand, string Name, int Year, string Status);
+    
     [HttpPost("/Car/{id:Int}/rent")]
     public async Task<IActionResult> RentCar([FromRoute] int id, [FromBody] CustomerData customerData)
     {
@@ -89,7 +90,12 @@ public class CarController : ControllerBase
             await _context.Companies.AddAsync(company);
         }
 
-        var offer = await CreateOffer(car, customer, company);
+        var offer = _context.Offers.FirstOrDefault(offer => offer.CarId == car.CarId);
+        if (offer != null)
+        {
+            return Conflict($"Car with id {car.CarId} already has an offer."); 
+        }
+        offer = await CreateOffer(car, customer, company);
         _logger.LogInformation("New offer created: {offer}", offer);
 
         var lease = new Lease
