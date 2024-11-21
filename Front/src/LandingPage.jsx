@@ -234,13 +234,13 @@ function StronaGlowna() {
 }
 
 function FormularzWypozyczenia({ samochod, onClose, zarezerwujSamochod }) {
-  const [imie, ustawImie] = useState('');
-  const [nazwisko, ustawNazwisko] = useState('');
+  const [firstName, ustawImie] = useState('');
+  const [lastName, ustawNazwisko] = useState('');
   const [email, ustawEmail] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    zarezerwujSamochod(samochod.id, { imie, nazwisko, email });
+    zarezerwujSamochod(samochod.id, { firstName, lastName, email });
   };
 
   return (
