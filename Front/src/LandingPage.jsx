@@ -25,7 +25,7 @@ function StronaGlowna() {
   function pobierzDostepneSamochody() {
     setLoading(true);
     axios
-      .get('/car')
+      .get('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/car')
       .then((response) => {
         console.log('API Response:', response.data);
         if (Array.isArray(response.data)) {
@@ -134,7 +134,7 @@ function StronaGlowna() {
 
   function zarezerwujSamochod(samochodId, daneKlienta) {
     axios
-      .post(`/car/${samochodId}/rent`, daneKlienta)
+      .post(`https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net//car/${samochodId}/rent`, daneKlienta)
       .then((response) => {
         alert('Samochód został wypożyczony pomyślnie!');
         pobierzDostepneSamochody();

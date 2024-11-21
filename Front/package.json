@@ -39,7 +39,6 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net",
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   }
