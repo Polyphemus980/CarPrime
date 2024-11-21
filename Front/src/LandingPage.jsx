@@ -270,7 +270,7 @@ function FormularzWypozyczenia({ samochod, onClose, zarezerwujSamochod }) {
             Imię:
             <input
               type="text"
-              value={imie}
+              value={firstName}
               onChange={(e) => ustawImie(e.target.value)}
               required
             />
@@ -279,7 +279,7 @@ function FormularzWypozyczenia({ samochod, onClose, zarezerwujSamochod }) {
             Nazwisko:
             <input
               type="text"
-              value={nazwisko}
+              value={lastName}
               onChange={(e) => ustawNazwisko(e.target.value)}
               required
             />
