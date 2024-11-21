@@ -134,7 +134,7 @@ function StronaGlowna() {
 
   function zarezerwujSamochod(samochodId, daneKlienta) {
     axios
-      .post(`https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net//car/${samochodId}/rent`, daneKlienta)
+      .post(`https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/car/${samochodId}/rent`, daneKlienta)
       .then((response) => {
         alert('Samochód został wypożyczony pomyślnie!');
         pobierzDostepneSamochody();
