@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using CarPrime.Services;
+﻿using CarPrime.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,13 +14,15 @@ public class CarController : ControllerBase
     private readonly ApplicationDbContext _context;
     private readonly IEmailService _emailService;
     private readonly ICustomerService _customerService;
+    private readonly IRentalService _rentalService;
 
-    public CarController(ApplicationDbContext context, ILogger<CarController> logger, IEmailService emailService, ICustomerService customerService)
+    public CarController(ApplicationDbContext context, ILogger<CarController> logger, IEmailService emailService, ICustomerService customerService, IRentalService rentalService)
     {
         _context = context;
         _logger = logger;
         _emailService = emailService;
         _customerService = customerService;
+        _rentalService = rentalService;
     }
     
     [HttpPost]
@@ -95,7 +96,7 @@ public class CarController : ControllerBase
         {
             return Conflict($"Car with id {car.CarId} already has an offer."); 
         }
-        offer = await CreateOffer(car, customer, company);
+        offer = await _rentalService.CreateOffer(car, customer, company);
         _logger.LogInformation("New offer created: {offer}", offer);
 
         var lease = new Lease
@@ -124,19 +125,18 @@ public class CarController : ControllerBase
         return Ok(carModel);
     }
 
-    
-    
-    
-    private async Task<Offer> CreateOffer(Car car, Customer customer, Company company)
+    [HttpGet("/Car/rented/customer={customerId:int}")]
+    public async Task<IActionResult> GetRentedCarsByCustomerId([FromRoute] int customerId)
     {
-        var offer = new Offer
-        {
-            Customer = customer,
-            Car = car,
-            Company = company,
-            CreatedAt = DateTime.Now,
-        };
-        await _context.Offers.AddAsync(offer);
-        return offer;
+        if (await _context.Customers.FindAsync(customerId) == null)
+            return NotFound($"Customer with id {customerId} not found");
+        var cars = await _context.Leases
+            .Where(lease => lease.Offer.CustomerId == customerId)
+            .Select(lease => new { car = lease.Offer.Car, status = lease.EndedAt != null ? CarStatus.RentEnded : CarStatus.CurrentlyRented })
+            .Select(arg => new FrontCar(arg.car.CarId, arg.car.Model.Brand, arg.car.Model.Name, arg.car.ManufactureYear.Year, arg.status))
+            .ToListAsync();
+        
+        return Ok(cars);
     }
+    
 }

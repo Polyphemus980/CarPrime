@@ -31,6 +31,9 @@ builder.Services.AddSingleton<IEmailService,EmailService>();
 
 //CustomerService
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+
+//RentalService
+builder.Services.AddScoped<IRentalService, RentalService>();
  
 //Google authentication config
 var secretKey = builder.Configuration["Jwt:SecretKey"];
