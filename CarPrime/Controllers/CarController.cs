@@ -1,4 +1,5 @@
-﻿using CarPrime.Services;
+﻿using System.Text.Json.Serialization;
+using CarPrime.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -47,14 +48,37 @@ public class CarController : ControllerBase
         var frontCars = await _context.Cars
             .GroupJoin(_context.Leases, car => car.CarId, lease => lease.Offer.CarId, (car, leases) => new { car, leases })
             // dostępne są te samochody, dla których nie ma aktywnych wypożyczeń
-            .Select(arg => new { arg.car, status = arg.leases.All(lease => lease.EndedAt != null) ? "available" : "not available" })
+            .Select(arg => new { arg.car, status = arg.leases.All(lease => lease.EndedAt != null) ? CarStatus.Available : CarStatus.NotAvailable })
             .Select(arg => new FrontCar(arg.car.CarId, arg.car.Model.Brand, arg.car.Model.Name, arg.car.ManufactureYear.Year, arg.status))
             .ToListAsync();
         _logger.LogInformation("Cars got action called.");
         return Ok(frontCars);
     }
+
+    public record FrontCar(int Id, string Brand, string Name, int Year, CarStatus Status);
     
-    public record FrontCar(int Id, string Brand, string Name, int Year, string Status);
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum CarStatus
+    {
+        /// <summary>
+        /// Not rented by anyone, can be rented
+        /// </summary>
+        [JsonStringEnumMemberName("available")]
+        Available,
+        /// <summary>
+        /// Currently rented by someone, cannot be rented
+        /// </summary>
+        [JsonStringEnumMemberName("not available")]
+        NotAvailable,
+        /// <summary>
+        /// Currently rented by this customer, used in <see cref="CarController.GetRentedCarsByCustomerId"/>
+        /// </summary>
+        CurrentlyRented,
+        /// <summary>
+        /// Car was rented by this customer at some point, used in <see cref="CarController.GetRentedCarsByCustomerId"/>
+        /// </summary>
+        RentEnded
+    }
     
     [HttpPost("/Car/{id:Int}/rent")]
     public async Task<IActionResult> RentCar([FromRoute] int id, [FromBody] CustomerData customerData)
