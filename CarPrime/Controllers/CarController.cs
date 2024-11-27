@@ -114,15 +114,14 @@ public class CarController : ControllerBase
     
     public record CustomerData(string FirstName, string LastName, string Email);
 
-    [HttpGet]
-    [Route("/Car/{id:int}")]
-    public async Task<IActionResult> GetModelById([FromRoute] int id)
+    [HttpGet("/Car/{id:int}")]
+    public async Task<IActionResult> GetCarById([FromRoute] int id)
     {
         _logger.LogInformation("Get action called with id {id}.", id);
-        var carModel = await _context.CarModels.FindAsync(id);
-        if (carModel == null)
+        var car = await _context.Cars.FindAsync(id);
+        if (car == null)
             return NotFound();
-        return Ok(carModel);
+        return Ok(car);
     }
 
     [HttpGet("/Car/rented/customer={customerId:int}")]
