@@ -27,7 +27,6 @@ public class AuthController : ControllerBase
     [HttpPost("authenticate")]
     public async Task<IActionResult> Authenticate([FromBody] GoogleAuthRequest request)
     {
-        //TODO: Add converting auth code to token?
         try
         {
             var payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken,
@@ -90,10 +89,11 @@ public class AuthController : ControllerBase
             CreatedAt = DateTime.Now
         };
         await _customerService.AddCustomerAsync(newCustomer);
-        return Ok();
+        var token = GenerateJwt(customerData.Email);
+        return Ok(new { Token = token });
     }
 }
-public record GoogleAuthRequest
+public record GoogleAuthRequest()
 {
     public string IdToken { get; init; }
 }
