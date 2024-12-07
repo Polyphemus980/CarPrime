@@ -38,7 +38,8 @@ function StronaGlowna() {
             opis: car.description || 'Brak opisu.',
             zdjecie: car.image || 'default_car.jpg',
             status: car.status || 'available',
-          }));
+          }))
+              .filter((car) => car.status && car.status === 'available');
           console.log('Loaded cars:', carsData);
           ustawSamochody(carsData);
           ustawFiltrujSamochody(carsData);
