@@ -1,4 +1,5 @@
-﻿using CarPrime.Data;
+﻿using System.Security.Claims;
+using CarPrime.Data;
 using CarPrime.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,5 +24,13 @@ public class CustomerService : ICustomerService
     {
         await _dbContext.Customers.AddAsync(customer);
         await _dbContext.SaveChangesAsync();
+    }
+    
+    public async Task<Customer?> GetAuthenticatedCustomerAsync(ClaimsPrincipal currentUser)
+    {
+        if (currentUser.Identity?.IsAuthenticated != true)
+            return null;
+        var email = currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        return await GetCustomerByEmailAsync(email);
     }
 }
