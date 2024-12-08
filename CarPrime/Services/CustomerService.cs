@@ -22,5 +22,6 @@ public class CustomerService : ICustomerService
     public async Task AddCustomerAsync(Customer customer)
     {
         await _dbContext.Customers.AddAsync(customer);
+        await _dbContext.SaveChangesAsync();
     }
 }
