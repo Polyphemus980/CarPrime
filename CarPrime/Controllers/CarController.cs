@@ -110,7 +110,61 @@ public class CarController : ControllerBase
         return company;
     }
     
-    public record CustomerData(string FirstName, string LastName, string Email);
+
+    [HttpGet("/Car/{id:int}/offer")]
+    [Authorize]
+    public async Task<IActionResult> RequestOffer([FromRoute] int id)
+    {
+        var car = await _context.Cars.FindAsync(id);
+        if (car == null)
+            return NotFound("Car not found");
+        var carModel = await _context.CarModels.FindAsync(car.ModelId);
+        if (carModel == null) 
+            throw new Exception("Invalid car in DB. Car model not found");
+        var customer = await _customerService.GetAuthenticatedCustomerAsync(User);
+        if (customer == null)
+            return Challenge();
+        var company = await DefaultCompany();
+        
+        var offer = await _rentalService.CreateOffer(car, customer, company);
+        _logger.LogInformation("New offer created: {offer}", offer);
+        var message = $"""
+                       Hello {customer.FirstName} {customer.LastName},
+                       
+                       
+                       Here are the details for the offer you requested:
+                       
+                       Customer Data:
+                           First Name:         {customer.FirstName}
+                           Last Name:          {customer.LastName}
+                           Email:              {customer.Email}
+                           Birth Date:         {customer.Birthdate:d}
+                           License Issue Date: {customer.LicenceIssuedDate:d}
+                           Country:            {customer.Country}
+                           City:               {customer.City}
+                           Address:            {customer.Address}
+                       Car Data:
+                           Brand:              {carModel.Brand}
+                           Model:              {carModel.Name}
+                           Manufacture Year:   {car.ManufactureYear.Year}
+                           Details:            {"" /*TODO*/}
+                           
+                       Offer Details:
+                           Insurance Price:    {offer.InsurancePrize}
+                           Rent Price:         {offer.RentPrize}
+                           Expiration Date:    {(offer.CreatedAt + RentalService.OfferExpirationTime):g}
+                        
+                           
+                       To accept or decline the offer, visit {"<TODO>" /*TODO link do strony*/}
+                       
+                       Sincerely,
+                       CarPrime Team
+                       """;
+        var subject = $"Offer for {carModel.Brand} {carModel.Name} ({car.ManufactureYear.Year})";
+        await _emailService.SendEmailAsync(customer.Email, subject, message);
+        _logger.LogInformation("email sent to {customer.Email}", customer.Email);
+        return Ok(offer.OfferId);
+    }
 
     [HttpGet("/Car/{id:int}")]
     public async Task<IActionResult> GetCarById([FromRoute] int id)
