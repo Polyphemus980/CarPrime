@@ -1,10 +1,24 @@
 ﻿using CarPrime.Data;
 using CarPrime.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CarPrime.Services;
 
 public class RentalService(ApplicationDbContext context) : IRentalService
 {
+    public async Task<IActionResult> GetOfferAsCustomer(int offerId, Customer customer)
+    {
+        var offer = await context.Offers.FindAsync(offerId);
+        if (offer == null)
+            return new NotFoundResult();
+        if (offer.CustomerId != customer.CustomerId)
+            return new UnauthorizedResult();
+        if (offer.IsDeleted)
+            return new NotFoundObjectResult("Offer deleted");
+        
+        return new OkObjectResult(offer);
+    }
+    
     public async Task<Offer> CreateOffer(Car car, Customer customer, Company company)
     {
         var offer = new Offer
@@ -15,6 +29,7 @@ public class RentalService(ApplicationDbContext context) : IRentalService
             CreatedAt = DateTime.Now,
         };
         await context.Offers.AddAsync(offer);
+        await context.SaveChangesAsync();
         return offer;
     }
 
@@ -38,7 +53,7 @@ public class RentalService(ApplicationDbContext context) : IRentalService
             CreatedAt = DateTime.Now,
         };
         await context.Leases.AddAsync(lease);
-        
+        await context.SaveChangesAsync();
         return lease;
     }
 
