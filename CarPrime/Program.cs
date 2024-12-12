@@ -29,6 +29,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseAzureS
 builder.Services.Configure<SendGridSettings>(builder.Configuration.GetSection("SendGrid"));
 builder.Services.AddSingleton<IEmailService,EmailService>();
 
+//BlobService
+builder.Services.Configure<BlobSettings>(builder.Configuration.GetSection("Blob"));
+builder.Services.AddSingleton<IBlobService, BlobService>();
 //CustomerService
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 
@@ -37,7 +40,6 @@ builder.Services.AddScoped<IRentalService, RentalService>();
  
 //Google authentication config
 var secretKey = builder.Configuration["Jwt:SecretKey"];
-Console.WriteLine(secretKey);
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

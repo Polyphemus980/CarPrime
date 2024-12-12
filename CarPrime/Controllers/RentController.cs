@@ -4,6 +4,7 @@ using CarPrime.Models;
 using CarPrime.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarPrime.Controllers;
 
@@ -12,7 +13,8 @@ public class RentController(
     ApplicationDbContext context,
     IRentalService rentalService,
     ICustomerService customerService,
-    ILogger<RentController> logger
+    ILogger<RentController> logger,
+    IBlobService blobService
 ) : ControllerBase
 {
     
@@ -57,6 +59,52 @@ public class RentController(
             return Unauthorized();
         return Ok(LeaseDisplay.FromLease(lease));
     }
+
+    [HttpDelete("/Lease/{id:Int}")]
+    public async Task<IActionResult> RequestEndLease([FromRoute] int leaseId)
+    {
+        var lease = await context.Leases.Where(lease => lease.LeaseId == leaseId).FirstOrDefaultAsync();
+        if (lease == null)
+        {
+            return NotFound($"No lease with id {leaseId} exists");
+        }
+
+        lease.Status = LeaseStatus.WaitingForEmployeeApproval;
+        return Ok("End lease process started");
+    }
+    
+    [HttpPost("/Lease/{id:int}/review")]
+    public async Task<IActionResult> AcceptLeaseReview([FromForm] ReturnData data,[FromRoute] int id) 
+    {
+        var  lease = await context.Leases.Where(lease => lease.LeaseId == id).FirstOrDefaultAsync();
+        if (lease == null)
+        {
+            return NotFound($"No lease with id {id} exists");
+        }
+
+        lease.Status = LeaseStatus.Finished;
+        lease.EndedAt = DateTime.Now;
+        var leaseReturn = new LeaseReturn
+        {
+            LeaseId = lease.LeaseId,
+            Description = data.Description,
+            Photos = new List<LeaseReturnPhoto>() 
+        };
+        List<string> imagePaths = await blobService.SavePhotos(data.Images, id);
+        foreach (var imagePath in imagePaths)
+        {
+            var leaseReturnPhoto = new LeaseReturnPhoto
+            {
+                LeaseReturn = leaseReturn,
+                ImageUrl= imagePath 
+            };
+
+            leaseReturn.Photos.Add(leaseReturnPhoto); 
+        }
+        context.LeaseReturns.Add(leaseReturn);
+        await context.SaveChangesAsync();
+        return Ok();
+    }
 }
 
 [SuppressMessage("ReSharper", "NotAccessedPositionalProperty.Global")]
@@ -65,11 +113,11 @@ public record OfferDisplay(int OfferId, int CarId, int CompanyId, decimal Insura
     public static OfferDisplay FromOffer(Offer offer) => 
         new(offer.OfferId, offer.CarId, offer.CompanyId, offer.InsurancePrize, offer.RentPrize, offer.CreatedAt);
 }
-
+public record ReturnData(List<IFormFile> Images,string Description);
 [SuppressMessage("ReSharper", "NotAccessedPositionalProperty.Global")]
-public record LeaseDisplay(int LeaseId, int? OfferId, DateTime CreatedAt, DateTime? EndedAt)
+public record LeaseDisplay(int LeaseId, int? OfferId, DateTime CreatedAt, DateTime? EndedAt,String Status)
 {
     //TODO czemu Lease.OfferId jest nullable?
     public static LeaseDisplay FromLease(Lease lease) =>
-        new(lease.LeaseId, lease.OfferId, lease.CreatedAt, lease.EndedAt);
+        new(lease.LeaseId, lease.OfferId, lease.CreatedAt, lease.EndedAt,lease.Status.ToString());
 }

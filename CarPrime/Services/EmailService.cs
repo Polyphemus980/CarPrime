@@ -1,4 +1,5 @@
-﻿using CarPrime.Configurations;
+﻿using System.Diagnostics.CodeAnalysis;
+using CarPrime.Configurations;
 using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;

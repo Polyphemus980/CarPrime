@@ -16,5 +16,5 @@ public class ApplicationDbContext: DbContext
     public DbSet<Lease> Leases { get; set; }
     public DbSet<LeaseReturn> LeaseReturns { get; set; }
     public DbSet<Offer> Offers { get; set; }
-    
+    public DbSet<LeaseReturnPhoto> LeaseReturnPhotos { get; set; }
 }
