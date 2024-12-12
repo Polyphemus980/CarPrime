@@ -70,6 +70,7 @@ public class RentController(
         }
 
         lease.Status = LeaseStatus.WaitingForEmployeeApproval;
+        await context.SaveChangesAsync();
         return Ok("End lease process started");
     }
     
@@ -117,7 +118,6 @@ public record ReturnData(List<IFormFile> Images,string Description);
 [SuppressMessage("ReSharper", "NotAccessedPositionalProperty.Global")]
 public record LeaseDisplay(int LeaseId, int? OfferId, DateTime CreatedAt, DateTime? EndedAt,String Status)
 {
-    //TODO czemu Lease.OfferId jest nullable?
     public static LeaseDisplay FromLease(Lease lease) =>
         new(lease.LeaseId, lease.OfferId, lease.CreatedAt, lease.EndedAt,lease.Status.ToString());
 }
