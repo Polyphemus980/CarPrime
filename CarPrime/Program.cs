@@ -14,10 +14,11 @@ builder.Services.AddSwaggerGen();
 //Cors config for allowing front end to make requests to this api
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontEnd",
-        corsBuilder => corsBuilder.WithOrigins("https://ashy-field-0c4ba1803.5.azurestaticapps.net")
-            .AllowAnyHeader()
-            .AllowAnyMethod());
+    options.AddPolicy("AllowAll", corsBuilder =>
+            corsBuilder.AllowAnyOrigin()  // Allows all origins
+                .AllowAnyHeader()  // Allows all headers
+                .AllowAnyMethod()  // Allows all HTTP methods
+    );
 });
 
 //Database config

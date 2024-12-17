@@ -11,4 +11,6 @@ public class Car
     [Required] public CarModel Model { get; set; }
     [Required] public DateTime ManufactureYear { get; set; }
     public Offer Offer { get; set; }
+    
+    //TODO add image url to car
 }
