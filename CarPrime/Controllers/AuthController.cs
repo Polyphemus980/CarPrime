@@ -68,7 +68,7 @@ public class AuthController : ControllerBase
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] CustomerRegistrationRequest customerData)
+    public async Task<IActionResult> Register([FromForm] CustomerRegistrationRequest customerData)
     {
         var customer = await _customerService.GetCustomerByEmailAsync(customerData.Email);
         if (customer != null)
