@@ -1,16 +1,16 @@
 // src/components/CarReturnForm.jsx
 
 import React, { useState } from 'react';
-import axios from 'axios';
 import './CarReturnForm.css';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
-function CarReturnForm({ car, onClose, returnCar }) {
+function CarReturnForm({ leaseId, onClose, returnCar }) {
   const [description, setDescription] = useState('');
   const [photos, setPhotos] = useState([]);
-  const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+
+  const handlePhotoChange = (e) => {
+    setPhotos([...e.target.files]);
+  };
 
   const validate = () => {
     const newErrors = {};
@@ -23,74 +23,29 @@ function CarReturnForm({ car, onClose, returnCar }) {
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
     const validationErrors = validate();
     setErrors(validationErrors);
-
     if (Object.keys(validationErrors).length > 0) {
       return;
     }
-
-    setSubmitting(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('description', description);
-      for (let i = 0; i < photos.length; i++) {
-        formData.append('photos', photos[i]);
-      }
-
-      const API_URL = `https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/car/${car.id}/return`;
-
-      const response = await axios.post(API_URL, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      toast.success('Car has been successfully returned!', {
-        position: toast.POSITION.TOP_RIGHT,
-        autoClose: 2000,
-      });
-
-      if (returnCar) {
-        returnCar(car.id);
-      }
-
-      setTimeout(() => {
-        onClose();
-      }, 2000);
-    } catch (err) {
-      console.error('Error returning car:', err);
-      if (err.response) {
-        toast.error(`Failed to return car: ${err.response.data.message}`, {
-          position: toast.POSITION.TOP_RIGHT,
-          autoClose: 5000,
-        });
-      } else if (err.request) {
-        toast.error('No response from the server. Please try again later.', {
-          position: toast.POSITION.TOP_RIGHT,
-          autoClose: 5000,
-        });
-      } else {
-        toast.error(`Error: ${err.message}`, {
-          position: toast.POSITION.TOP_RIGHT,
-          autoClose: 5000,
-        });
-      }
-    } finally {
-      setSubmitting(false);
-    }
+    const customerData = {
+      description,
+      photos,
+    };
+    returnCar(leaseId, customerData);
   };
 
   return (
-    <div className="car-return-form-overlay">
+    <div className="car-return-form-container">
       <div className="car-return-form">
-        <h2>Return {car.brand} {car.model}</h2>
-        <form onSubmit={handleSubmit}>
-          <label>
+        <button className="close-button" onClick={onClose}>
+          &times;
+        </button>
+        <h2>Return Car</h2>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
+          <label htmlFor="description">
             Description of Car's State:
             <textarea
               id="description"
@@ -103,28 +58,20 @@ function CarReturnForm({ car, onClose, returnCar }) {
             {errors.description && <span className="error-message">{errors.description}</span>}
           </label>
 
-          <label>
+          <label htmlFor="photos">
             Upload Photos:
             <input
+              type="file"
               id="photos"
               name="photos"
-              type="file"
-              accept="image/*"
               multiple
-              onChange={(e) => setPhotos(e.target.files)}
+              onChange={handlePhotoChange}
               required
             />
             {errors.photos && <span className="error-message">{errors.photos}</span>}
           </label>
 
-          <div className="form-buttons">
-            <button type="submit" disabled={submitting}>
-              {submitting ? 'Submitting...' : 'Submit Return'}
-            </button>
-            <button type="button" onClick={onClose} disabled={submitting}>
-              Cancel
-            </button>
-          </div>
+          <button type="submit">Submit Return</button>
         </form>
       </div>
     </div>

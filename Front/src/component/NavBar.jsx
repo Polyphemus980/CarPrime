@@ -28,12 +28,14 @@ function Navbar() {
         {user ? (
           <>
             <span className="navbar-user">Hello, {user.name || user.email}!</span>
-            <Link to="/rent">
+            <Link to="/">
               <button className="navbar-button">Rent Car</button>
             </Link>
-            <Link to="/return">
-              <button className="navbar-button">Return Car</button>
-            </Link>
+            {user.isWorker && (
+              <Link to="/worker">
+                <button className="navbar-button">Worker Dashboard</button>
+              </Link>
+            )}
             <button className="navbar-button" onClick={handleLogout}>
               Logout
             </button>
@@ -43,7 +45,7 @@ function Navbar() {
             <button className="navbar-button" onClick={() => navigate('/login')}>
               Login
             </button>
-            <button className="navbar-button" onClick={() => navigate('/login')}>
+            <button className="navbar-button" onClick={() => navigate('/register')}>
               Register
             </button>
           </>
