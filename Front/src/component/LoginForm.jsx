@@ -109,7 +109,8 @@ function LoginForm() {
         );
       }
     };
-  }, []); // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); //eslint-disable-next-line react-hooks/exhaustive-deps
 
   return (
     <div className="login-form-container">
