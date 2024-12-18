@@ -1,7 +1,7 @@
 // src/components/HomePage.jsx
 
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import axios from '../axiosConfig';
 import './HomePage.css';
 import CarRentalForm from './CarRentalFrom';
 import { UserContext } from '../context/UserContext';
@@ -13,7 +13,7 @@ function HomePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [selectedCar, setSelectedCar] = useState(null); // For Rental Form
+  const [selectedCar, setSelectedCar] = useState(null);
 
   useEffect(() => {
     fetchAvailableCars();
@@ -23,8 +23,7 @@ function HomePage() {
     setLoading(true);
     setError(null);
     try {
-      // Replace with your actual API endpoint to fetch available cars
-      const response = await axios.get('./api/cars/available');
+      const response = await axios.get('/Car');
       setCars(response.data);
     } catch (err) {
       console.error('Error fetching cars:', err);
@@ -34,39 +33,45 @@ function HomePage() {
     }
   };
 
-  const handleRentCar = (carId, customerData) => {
-    // Implement the logic to rent a car
-    // For example, send a POST request to rent the car
-    axios.post(`./api/cars/${carId}/rent`, customerData)
-      .then(response => {
-        toast.success('Car rented successfully!', {
-          position: 'top-right',
-          autoClose: 3000,
-        });
-        // Refresh available cars
-        fetchAvailableCars();
-        // Close the rental form
-        setSelectedCar(null);
-      })
-      .catch(error => {
-        console.error('Error renting car:', error);
-        if (error.response) {
-          toast.error(`Renting failed: ${error.response.data.Message || error.response.data}`, {
-            position: 'top-right',
-            autoClose: 5000,
-          });
-        } else if (error.request) {
-          toast.error('No response from the server. Please try again later.', {
-            position: 'top-right',
-            autoClose: 5000,
-          });
-        } else {
-          toast.error(`Error: ${error.message}`, {
-            position: 'top-right',
-            autoClose: 5000,
-          });
-        }
+  const handleRentCar = async (carId, customerData) => {
+    try {
+      const formData = new FormData();
+      formData.append('description', customerData.description);
+      customerData.photos.forEach((photo) => {
+        formData.append('photos', photo);
       });
+
+      const response = await axios.post(`/Car/${carId}/rent`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      toast.success('Car rented successfully!', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
+      fetchAvailableCars();
+      setSelectedCar(null);
+    } catch (error) {
+      console.error('Error renting car:', error);
+      if (error.response) {
+        toast.error(`Renting failed: ${error.response.data.Message || error.response.data}`, {
+          position: 'top-right',
+          autoClose: 5000,
+        });
+      } else if (error.request) {
+        toast.error('No response from the server. Please try again later.', {
+          position: 'top-right',
+          autoClose: 5000,
+        });
+      } else {
+        toast.error(`Error: ${error.message}`, {
+          position: 'top-right',
+          autoClose: 5000,
+        });
+      }
+    }
   };
 
   return (
@@ -74,7 +79,6 @@ function HomePage() {
       <h1>Available Cars</h1>
       {loading ? (
         <div className="spinner">
-          {/* Spinner can be a CSS-based loader */}
           <div className="double-bounce1"></div>
           <div className="double-bounce2"></div>
         </div>
@@ -85,19 +89,21 @@ function HomePage() {
       ) : (
         <div className="car-list">
           {cars.map((car) => (
-            <div key={car.id} className="car-card">
+            <div key={car.Id} className="car-card">
               <img
                 src={`/images/${car.image}`}
-                alt={`${car.brand} ${car.model}`}
+                alt={`${car.Brand} ${car.Name}`}
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
                 }}
               />
-              <h2>{car.brand} {car.model}</h2>
-              <p>Year: {car.year}</p>
-              <p>Price per day: ${car.pricePerDay}</p>
-              <button onClick={() => setSelectedCar(car)}>Rent Now</button>
+              <h2>{car.Brand} {car.Name}</h2>
+              <p>Year: {car.Year}</p>
+              <p>Status: {car.Status}</p>
+              {car.Status === 'Available' && (
+                <button onClick={() => setSelectedCar(car)}>Rent Now</button>
+              )}
             </div>
           ))}
         </div>

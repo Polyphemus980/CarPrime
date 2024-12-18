@@ -1,15 +1,15 @@
 // src/components/LoginForm.jsx
 
 import React, { useState, useContext, useEffect } from 'react';
-import axios from 'axios';
 import './LoginForm.css';
-import { toast } from 'react-toastify';
 import { UserContext } from '../context/UserContext';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
+import axios from '../axiosConfig';
+import { toast } from 'react-toastify';
 
 function LoginForm() {
   const { login } = useContext(UserContext);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -19,47 +19,35 @@ function LoginForm() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const specialToken = 'SPECIAL_TOKEN_FOR_JANGASKA00';
+  const specialWorkerEmail = 'jangaska00@gmail.com';
 
-  const handleGoogleLogin = async (response) => {
+  const handleGoogleLogin = (response) => {
     setSubmitting(true);
-    try {
-      const API_URL = './api/Auth/authenticate';
-      const res = await axios.post(API_URL, {
-        IdToken: response.credential,
-      });
-      const token = res.data.Token;
-      toast.success('Logged in successfully!', {
-        position: 'top-right',
-        autoClose: 3000,
-      });
-      // Assuming the backend returns user details
-      login({ token, name: res.data.userName, email: res.data.email });
-      navigate('/'); // Redirect to main page
-    } catch (error) {
-      console.error('Login error:', error);
-      if (error.response) {
-        toast.error(`Login failed: ${error.response.data.Message || error.response.data}`, {
-          position: 'top-right',
-          autoClose: 5000,
-        });
-      } else if (error.request) {
-        toast.error('No response from the server. Please try again later.', {
-          position: 'top-right',
-          autoClose: 5000,
-        });
-      } else {
-        toast.error(`Error: ${error.message}`, {
-          position: 'top-right',
-          autoClose: 5000,
-        });
-      }
-    } finally {
-      setSubmitting(false);
-    }
+    const idToken = response.credential;
+    axios.post('./api/Auth/authenticate', { IdToken: idToken })
+      .then(res => {
+        if (res.data.requiresAdditionalInfo) {
+          navigate(`/register?email=${res.data.email}`);
+        } else {
+          const isWorker = res.data.email.toLowerCase() === specialWorkerEmail;
+          const userData = {
+            token: res.data.Token,
+            name: res.data.name || res.data.email,
+            email: res.data.email,
+            isWorker,
+          };
+          login(userData);
+          navigate('/');
+        }
+      })
+      .catch(error => {
+        console.error('Login error:', error);
+        toast.error('Google Login failed', { position: 'top-right', autoClose: 5000 });
+      })
+      .finally(() => setSubmitting(false));
   };
 
-  const handleEmailLogin = async (e) => {
+  const handleEmailLogin = (e) => {
     e.preventDefault();
     const newErrors = {};
     const { email, password } = formData;
@@ -79,52 +67,28 @@ function LoginForm() {
       return;
     }
 
-    if (email.trim().toLowerCase() === 'jangaska00@gmail.com') {
-      toast.success('Logged in successfully!', {
-        position: 'top-right',
-        autoClose: 3000,
-      });
-      login({ token: specialToken, email: 'jangaska00@gmail.com', name: 'Jangaska' });
-      navigate('/');
-      return;
-    }
-
     setSubmitting(true);
-    try {
-      const API_URL = './api/Auth/authenticate';
-      const res = await axios.post(API_URL, {
-        email,
-        password,
-      });
-      const token = res.data.Token;
-      toast.success('Logged in successfully!', {
-        position: 'top-right',
-        autoClose: 3000,
-      });
-      // Assuming the backend returns user details
-      login({ token, name: res.data.userName, email: res.data.email });
-      navigate('/'); // Redirect to main page
-    } catch (error) {
-      console.error('Login error:', error);
-      if (error.response) {
-        toast.error(`Login failed: ${error.response.data.Message || error.response.data}`, {
-          position: 'top-right',
-          autoClose: 5000,
-        });
-      } else if (error.request) {
-        toast.error('No response from the server. Please try again later.', {
-          position: 'top-right',
-          autoClose: 5000,
-        });
-      } else {
-        toast.error(`Error: ${error.message}`, {
-          position: 'top-right',
-          autoClose: 5000,
-        });
-      }
-    } finally {
-      setSubmitting(false);
-    }
+    axios.post('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/authenticate', { email, password })
+      .then(res => {
+        if (res.data.requiresAdditionalInfo) {
+          navigate(`./register?email=${res.data.email}`);
+        } else {
+          const isWorker = email.toLowerCase() === specialWorkerEmail;
+          const userData = {
+            token: res.data.Token,
+            name: res.data.name || email,
+            email: email,
+            isWorker,
+          };
+          login(userData);
+          navigate('/');
+        }
+      })
+      .catch(error => {
+        console.error('Login error:', error);
+        toast.error('Login failed', { position: 'top-right', autoClose: 5000 });
+      })
+      .finally(() => setSubmitting(false));
   };
 
   useEffect(() => {
@@ -136,7 +100,7 @@ function LoginForm() {
     script.onload = () => {
       if (window.google && window.google.accounts) {
         window.google.accounts.id.initialize({
-          client_id: 'YOUR_GOOGLE_CLIENT_ID', 
+          client_id: '847934116290-srh43sv05kgb7nctnfifoocekfaf8kqn.apps.googleusercontent.com',
           callback: handleGoogleLogin,
         });
         window.google.accounts.id.renderButton(

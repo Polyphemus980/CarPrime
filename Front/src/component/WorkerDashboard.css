@@ -1,0 +1,96 @@
+/* src/components/WorkerDashboard.css */
+
+.worker-dashboard-container {
+    padding: 20px;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+  }
+  
+  .worker-dashboard-container h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+  }
+  
+  .lease-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .lease-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .lease-card h2 {
+    margin-top: 0;
+    color: #007bff;
+  }
+  
+  .lease-card p {
+    margin: 5px 0;
+    color: #555;
+  }
+  
+  .lease-card .photos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 10px 0;
+  }
+  
+  .lease-card .photos img {
+    width: 100px;
+    height: 75px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  .lease-card button {
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .lease-card button:hover {
+    background-color: #218838;
+  }
+  
+  .spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+  }
+  
+  .double-bounce1, .double-bounce2 {
+    width: 40px;
+    height: 40px;
+    background-color: #007bff;
+    border-radius: 100%;
+    opacity: 0.6;
+    animation: sk-bounce 2.0s infinite ease-in-out;
+  }
+  
+  .double-bounce2 {
+    animation-delay: -1.0s;
+  }
+  
+  @keyframes sk-bounce {
+    0%, 100% { transform: scale(0.0) }
+    50% { transform: scale(1.0) }
+  }
+  
+  .error {
+    color: #dc3545;
+    text-align: center;
+    font-size: 1.1rem;
+  }
+  

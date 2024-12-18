@@ -1,90 +1,72 @@
-// src/components/ReturnsPage.jsx
+// src/components/CarRentalForm.jsx
 
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import './ReturnsPage.css';
-import CarReturnForm from './CarReturnForm';
-import { UserContext } from '../context/UserContext';
-import { toast } from 'react-toastify';
+import React, { useState } from 'react';
+import './CarRentalForm.css';
 
-function ReturnsPage() {
-  const { user } = useContext(UserContext);
-  const [rentals, setRentals] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+function CarRentalForm({ car, onClose, rentCar }) {
+  const [description, setDescription] = useState('');
+  const [photos, setPhotos] = useState([]);
+  const [errors, setErrors] = useState({});
 
-  const [selectedRental, setSelectedRental] = useState(null); 
-
-  useEffect(() => {
-    fetchUserRentals();
-  }, []);
-
-  const fetchUserRentals = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get(`./api/rentals?email=${user.email}`);
-      setRentals(response.data);
-    } catch (err) {
-      console.error('Error fetching rentals:', err);
-      setError('Failed to load your rentals.');
-    } finally {
-      setLoading(false);
-    }
+  const handlePhotoChange = (e) => {
+    setPhotos([...e.target.files]);
   };
 
-  const handleReturnCar = (carId, customerData) => {
-    toast.success('Car returned successfully!', {
-      position: 'top-right',
-      autoClose: 3000,
-    });
-    fetchUserRentals();
-    setSelectedRental(null);
+  const validate = () => {
+    const newErrors = {};
+    if (!description.trim()) newErrors.description = 'Description is required.';
+    return newErrors;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const validationErrors = validate();
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
+    const customerData = {
+      description,
+      photos,
+    };
+    rentCar(car.Id, customerData);
   };
 
   return (
-    <div className="returns-container">
-      <h1>Your Rentals</h1>
-      {loading ? (
-        <div className="spinner">
-          {/* Spinner can be a CSS-based loader */}
-          <div className="double-bounce1"></div>
-          <div className="double-bounce2"></div>
-        </div>
-      ) : error ? (
-        <p className="error">{error}</p>
-      ) : rentals.length === 0 ? (
-        <p>You have no rentals.</p>
-      ) : (
-        <div className="rental-list">
-          {rentals.map((rental) => (
-            <div key={rental.id} className="rental-card">
-              <img
-                src={`/images/${rental.car.image}`}
-                alt={`${rental.car.brand} ${rental.car.model}`}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
-                }}
-              />
-              <h2>{rental.car.brand} {rental.car.model}</h2>
-              <p>Rental Date: {new Date(rental.rentalDate).toLocaleDateString()}</p>
-              <p>Due Date: {new Date(rental.dueDate).toLocaleDateString()}</p>
-              <button onClick={() => setSelectedRental(rental)}>Return Car</button>
-            </div>
-          ))}
-        </div>
-      )}
+    <div className="car-rental-form-container">
+      <div className="car-rental-form">
+        <button className="close-button" onClick={onClose}>
+          &times;
+        </button>
+        <h2>Rent {car.Brand} {car.Name}</h2>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
+          <label htmlFor="description">
+            Description:
+            <textarea
+              id="description"
+              name="description"
+              placeholder="Enter a description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
+            {errors.description && <span className="error-message">{errors.description}</span>}
+          </label>
 
-      {selectedRental && (
-        <CarReturnForm
-          car={selectedRental.car}
-          onClose={() => setSelectedRental(null)}
-          returnCar={handleReturnCar}
-        />
-      )}
+          <label htmlFor="photos">
+            Upload Photos:
+            <input
+              type="file"
+              id="photos"
+              name="photos"
+              multiple
+              onChange={handlePhotoChange}
+            />
+          </label>
+
+          <button type="submit">Submit</button>
+        </form>
+      </div>
     </div>
   );
 }
 
-export default ReturnsPage;
+export default CarRentalForm;
