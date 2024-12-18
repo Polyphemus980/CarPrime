@@ -1,0 +1,72 @@
+/* src/component/RegisterPage.css */
+
+.register-form-container {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .register-form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .register-form-container form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .register-form-container label {
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  .register-form-container input[type="text"],
+  .register-form-container input[type="email"],
+  .register-form-container input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .register-form-container .error-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 5px;
+  }
+  
+  .register-form-container button[type="submit"] {
+    padding: 12px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .register-form-container button[type="submit"]:hover {
+    background-color: #218838;
+  }
+  
+  @media (max-width: 500px) {
+    .register-form-container {
+      padding: 20px;
+    }
+  
+    .register-form-container button[type="submit"] {
+      font-size: 0.9rem;
+      padding: 10px;
+    }
+  }
+  

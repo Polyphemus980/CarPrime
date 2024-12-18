@@ -1,0 +1,94 @@
+/* src/styles/HomePage.css */
+.container {
+  padding: 20px;
+}
+
+.search-bar input {
+  margin-right: 10px;
+  padding: 5px;
+}
+
+.search-bar button {
+  padding: 5px 10px;
+}
+
+.filters {
+  margin: 20px 0;
+}
+
+.filters label {
+  margin-right: 15px;
+}
+
+.auth-forms {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.car-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.car-card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  width: 300px;
+}
+
+.car-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.car-card button {
+  margin-top: 10px;
+  padding: 5px 10px;
+}
+
+.pagination button {
+  margin: 5px;
+  padding: 5px 10px;
+}
+
+.pagination .active {
+  background-color: #007bff;
+  color: white;
+}
+
+.error {
+  color: red;
+}
+
+.spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.double-bounce1,
+.double-bounce2 {
+  width: 40px;
+  height: 40px;
+  background-color: #007bff;
+  border-radius: 100%;
+  opacity: 0.6;
+  animation: bounce 2.0s infinite ease-in-out;
+}
+
+.double-bounce2 {
+  animation-delay: -1.0s;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: scale(0.0);
+  }
+  50% {
+    transform: scale(1.0);
+  }
+}

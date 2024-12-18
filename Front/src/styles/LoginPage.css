@@ -1,0 +1,10 @@
+/* src/styles/LoginPage.css */
+
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 60px);
+    background-color: #f4f4f4;
+  }
+  

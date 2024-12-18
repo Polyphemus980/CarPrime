@@ -1,0 +1,60 @@
+/* src/styles/CarReturnForm.css */
+.return-form-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .return-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 400px;
+  }
+  
+  .return-form h2 {
+    margin-top: 0;
+  }
+  
+  .car-info {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .car-info img {
+    width: 150px;
+    height: 100px;
+    object-fit: cover;
+  }
+  
+  .form-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  .return-form form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .return-form label {
+    margin-bottom: 10px;
+  }
+  
+  .return-form input {
+    padding: 5px;
+    margin-top: 5px;
+  }
+  
+  .return-form button {
+    padding: 5px 10px;
+  }
+  
