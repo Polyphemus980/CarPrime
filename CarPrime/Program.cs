@@ -71,5 +71,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.UseCors("AllowFrontEnd");
+app.UseCors("AllowAll");
 app.Run();

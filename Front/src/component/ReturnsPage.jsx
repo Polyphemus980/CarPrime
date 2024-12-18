@@ -8,7 +8,7 @@ import { UserContext } from '../context/UserContext';
 import { toast } from 'react-toastify';
 
 function ReturnsPage() {
-  const { user } = useContext(UserContext);
+  //const { user } = useContext(UserContext);
   const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

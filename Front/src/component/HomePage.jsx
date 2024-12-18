@@ -4,11 +4,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from '../axiosConfig';
 import './HomePage.css';
 import CarRentalForm from './CarRentalFrom';
-import { UserContext } from '../context/UserContext';
 import { toast } from 'react-toastify';
 
 function HomePage() {
-  const { user } = useContext(UserContext);
+  //const { user } = useContext(UserContext);
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -41,11 +40,11 @@ function HomePage() {
         formData.append('photos', photo);
       });
 
-      const response = await axios.post(`/Car/${carId}/rent`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      //const response = await axios.post(`/Car/${carId}/rent`, formData, {
+      //  headers: {
+      //    'Content-Type': 'multipart/form-data',
+      //  },
+      //});
 
       toast.success('Car rented successfully!', {
         position: 'top-right',
