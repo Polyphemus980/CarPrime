@@ -1,6 +1,6 @@
 // src/components/HomePage.jsx
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from '../axiosConfig';
 import './HomePage.css';
 import CarRentalForm from './CarRentalFrom';
