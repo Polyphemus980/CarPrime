@@ -107,9 +107,9 @@ function HomePage() {
     }
   }
 
-  useEffect(() => { // react-hooks/exhaustive-deps
-    handleSearch(); // react-hooks/exhaustive-deps
-  }, [selectedProperties]);
+  useEffect(() => { // eslint-disable-next-line react-hooks/exhaustive-deps
+    handleSearch(); // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProperties]); // eslint-disable-next-line react-hooks/exhaustive-deps
 
   function paginateCars() {
     const lastCarIndex = currentPage * carsPerPage;

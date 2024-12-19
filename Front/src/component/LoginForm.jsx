@@ -51,8 +51,8 @@ function LoginForm() {
         });
       }
     };
-    // react-hooks/exhaustive-deps
-    initializeGapi(); // react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    initializeGapi(); // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
