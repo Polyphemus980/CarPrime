@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import axios from '../axiosConfig';
 import { toast } from 'react-toastify';
-import './CarRentalForm.css';
+import './RentalForm.css'; 
 
 function RentalForm({ car, onClose }) {
   const [rentForm, setRentForm] = useState({
@@ -47,11 +47,11 @@ function RentalForm({ car, onClose }) {
     setSubmitting(true);
     try {
       const rentData = {
-        CarId: car.id, 
+        CarId: car.id,
         StartDate: rentForm.startDate,
         EndDate: rentForm.endDate,
       };
-      const res = await axios.post('/api/Rent', rentData); 
+      const res = await axios.post(`https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/Car/${car.id}/rent`, rentData); 
 
       toast.success('Car rented successfully!', { position: 'top-right', autoClose: 5000 });
       console.log('Received LeaseId:', res.data.LeaseId);

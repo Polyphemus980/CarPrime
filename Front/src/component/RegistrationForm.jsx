@@ -58,18 +58,22 @@ function RegistrationForm({ onSwitchToLogin }) {
       return;
     }
     setSubmitting(true);
-    axios.post('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/register', {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      birthdate: formData.birthdate,
-      licenceIssuedDate: formData.licenceIssuedDate,
-      country: formData.country,
-      city: formData.city,
-      address: formData.address,
-    })
+
+    // Create FormData object
+    const formDataToSend = new FormData();
+    formDataToSend.append('firstName', formData.firstName);
+    formDataToSend.append('lastName', formData.lastName);
+    formDataToSend.append('email', formData.email);
+    formDataToSend.append('birthdate', formData.birthdate); 
+    formDataToSend.append('licenceIssuedDate', formData.licenceIssuedDate); 
+    formDataToSend.append('country', formData.country);
+    formDataToSend.append('city', formData.city);
+    formDataToSend.append('address', formData.address);
+
+    axios.post('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/register', formDataToSend)
       .then(res => {
         const { Token } = res.data;
+        console.log('Received Token:', Token); 
         const isWorker = formData.email.toLowerCase() === specialWorkerEmail;
         const userData = {
           token: Token,

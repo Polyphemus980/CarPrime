@@ -8,9 +8,11 @@ import RegistrationForm from './component/RegistrationForm';
 import HomePage from './component/HomePage';
 import ReturnsPage from './component/ReturnsPage';
 import WorkerDashboard from './component/WorkerDashboard';
+import RentCar from './component/RentCar'; 
 import { UserContext } from './context/UserContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import MyRented from './component/MyRented';
 
 function App() {
   const { user } = useContext(UserContext);
@@ -41,6 +43,14 @@ function App() {
           element={
             user && user.isWorker ? <WorkerDashboard /> : <Navigate to="/" replace />
           }
+        />
+        <Route
+          path="/rent"
+          element={user ? <RentCar /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/myrented"
+          element={user ? <MyRented /> : <Navigate to="/myrented" replace />}
         />
         <Route
           path="*"

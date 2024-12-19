@@ -1,0 +1,76 @@
+/* src/components/RentalForm.css */
+
+.rent-form-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; 
+  }
+  
+  .rent-form-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 400px;
+    position: relative;
+  }
+  
+  .rent-form-content h3 {
+    margin-top: 0;
+  }
+  
+  .rent-form-content form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .rent-form-content label {
+    margin-bottom: 15px;
+  }
+  
+  .rent-form-content input[type="date"] {
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .form-buttons {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .form-buttons button {
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .form-buttons button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .form-buttons button[type="submit"]:hover {
+    background-color: #45a049;
+  }
+  
+  .form-buttons button[type="button"] {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .form-buttons button[type="button"]:hover {
+    background-color: #da190b;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 0.9em;
+  }
+  

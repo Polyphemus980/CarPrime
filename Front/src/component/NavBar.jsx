@@ -22,18 +22,21 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <h2>Car Rental Service</h2>
+        <h2>Car Rental Service - Car Prime</h2>
       </div>
       <div className="navbar-links">
         {user ? (
           <>
             <span className="navbar-user">Hello, {user.name || user.email}!</span>
-            <Link to="/">
+            <Link to="/myrented">
+              <button className="navbar-button">My rented</button>
+            </Link>
+            <Link to="/rent">
               <button className="navbar-button">Rent Car</button>
             </Link>
             {user.isWorker && (
               <Link to="/worker">
-                <button className="navbar-button">Worker Dashboard</button>
+                <button className="navbar-button">Accept Returns - Worker</button>
               </Link>
             )}
             <button className="navbar-button" onClick={handleLogout}>

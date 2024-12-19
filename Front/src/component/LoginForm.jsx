@@ -21,33 +21,81 @@ function LoginForm() {
 
   const specialWorkerEmail = 'jangaska00@gmail.com';
 
-  const handleGoogleLogin = (response) => {
-    setSubmitting(true);
-    const idToken = response.credential;
-    axios.post('./api/Auth/authenticate', { IdToken: idToken })
-      .then(res => {
-        if (res.data.requiresAdditionalInfo) {
-          navigate(`/register?email=${res.data.email}`);
-        } else {
-          const isWorker = res.data.email.toLowerCase() === specialWorkerEmail;
-          const userData = {
-            token: res.data.Token,
-            name: res.data.name || res.data.email,
-            email: res.data.email,
-            isWorker,
-          };
-          login(userData);
-          navigate('/');
-        }
-      })
-      .catch(error => {
-        console.error('Login error:', error);
-        toast.error('Google Login failed', { position: 'top-right', autoClose: 5000 });
-      })
-      .finally(() => setSubmitting(false));
+  useEffect(() => {
+    const initializeGapi = () => {
+      if (window.gapi) {
+        window.gapi.load('auth2', () => {
+          window.gapi.auth2.init({
+            client_id: '847934116290-srh43sv05kgb7nctnfifoocekfaf8kqn.apps.googleusercontent.com',
+          }).then(() => {
+            renderGoogleSignInButton();
+          }).catch((error) => {
+            console.error('Error initializing Google Auth:', error);
+          });
+        });
+      } else {
+        console.error('GAPI not loaded');
+      }
+    };
+
+    const renderGoogleSignInButton = () => {
+      if (window.gapi && window.gapi.auth2) {
+        window.gapi.signin2.render('googleSignInButton', {
+          scope: 'profile email',
+          width: 240,
+          height: 50,
+          longtitle: true,
+          theme: 'dark',
+          onsuccess: onGoogleSignInSuccess,
+          onfailure: onGoogleSignInFailure,
+        });
+      }
+    };
+    // react-hooks/exhaustive-deps
+    initializeGapi(); // react-hooks/exhaustive-deps
+  }, []);
+
+
+  const onGoogleSignInSuccess = (googleUser) => {
+    const idToken = googleUser.getAuthResponse().id_token;
+    console.log('Google idToken:', idToken);  
+
+    handleGoogleLogin(idToken);
   };
 
-  const handleEmailLogin = (e) => {
+  const onGoogleSignInFailure = (error) => {
+    console.error('Google Sign-In Error:', error);
+    toast.error('Google Sign-In failed', { position: 'top-right', autoClose: 5000 });
+  };
+
+  const handleGoogleLogin = async (idToken) => {
+    setSubmitting(true);
+    try {
+      const res = await axios.post('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/register', { IdToken: idToken });
+
+      if (res.data.requiresAdditionalInfo) {
+        navigate(`/register?email=${res.data.email}`);
+      } else {
+        const isWorker = res.data.email.toLowerCase() === specialWorkerEmail;
+        const userData = {
+          token: res.data.Token,
+          name: res.data.name || res.data.email,
+          email: res.data.email,
+          isWorker,
+        };
+        login(userData);
+        navigate('/');
+        console.log('Received Token:', res.data.Token); 
+      }
+    } catch (error) {
+      console.error('Google Login error:', error);
+      toast.error('Google Login failed', { position: 'top-right', autoClose: 5000 });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleEmailLogin = async (e) => {
     e.preventDefault();
     const newErrors = {};
     const { email, password } = formData;
@@ -68,55 +116,41 @@ function LoginForm() {
     }
 
     setSubmitting(true);
-    axios.post('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/authenticate', { email, password })
-      .then(res => {
-        if (res.data.requiresAdditionalInfo) {
-          navigate(`./register?email=${res.data.email}`);
-        } else {
-          const isWorker = email.toLowerCase() === specialWorkerEmail;
-          const userData = {
-            token: res.data.Token,
-            name: res.data.name || email,
-            email: email,
-            isWorker,
-          };
-          login(userData);
-          navigate('/');
-        }
-      })
-      .catch(error => {
-        console.error('Login error:', error);
-        toast.error('Login failed', { position: 'top-right', autoClose: 5000 });
-      })
-      .finally(() => setSubmitting(false));
-  };
+    try {
+      const res = await axios.post('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/register', { email, password });
 
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-    script.onload = () => {
-      if (window.google && window.google.accounts) {
-        window.google.accounts.id.initialize({
-          client_id: '847934116290-srh43sv05kgb7nctnfifoocekfaf8kqn.apps.googleusercontent.com',
-          callback: handleGoogleLogin,
-        });
-        window.google.accounts.id.renderButton(
-          document.getElementById('googleSignInDiv'),
-          { theme: 'outline', size: 'large' }
-        );
+      if (res.data.requiresAdditionalInfo) {
+        navigate(`/register?email=${res.data.email}`);
+      } else {
+        const isWorker = email.toLowerCase() === specialWorkerEmail;
+        const userData = {
+          token: res.data.Token,
+          name: res.data.name || email,
+          email: email,
+          isWorker,
+        };
+        login(userData);
+        navigate('/');
+        console.log('Received Token:', res.data.Token);
       }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); //eslint-disable-next-line react-hooks/exhaustive-deps
+    } catch (error) {
+      console.error('Email Login error:', error);
+      toast.error('Login failed', { position: 'top-right', autoClose: 5000 });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="login-form-container">
       <h2>Log In</h2>
-      <div id="googleSignInDiv"></div>
+      
+      {}
+      <div id="googleSignInButton"></div>
+      
       <div className="separator">OR</div>
+      
+      {}
       <form onSubmit={handleEmailLogin} noValidate>
         <label htmlFor="email">
           Email:

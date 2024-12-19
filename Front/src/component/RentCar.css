@@ -1,0 +1,115 @@
+/* src/components/RentCar.css */
+
+.rent-car-container {
+    padding: 20px;
+  }
+  
+  .cars-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .cars-table th, .cars-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  .cars-table th {
+    background-color: #f2f2f2;
+  }
+  
+  .cars-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .cars-table tr:hover {
+    background-color: #ddd;
+  }
+  
+  .cars-table button {
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .cars-table button:hover {
+    background-color: #45a049;
+  }
+  
+  
+  .rent-form-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .rent-form-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 400px;
+  }
+  
+  .rent-form-content h3 {
+    margin-top: 0;
+  }
+  
+  .rent-form-content form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .rent-form-content label {
+    margin-bottom: 15px;
+  }
+  
+  .rent-form-content input[type="date"] {
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .form-buttons {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .form-buttons button {
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .form-buttons button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .form-buttons button[type="submit"]:hover {
+    background-color: #45a049;
+  }
+  
+  .form-buttons button[type="button"] {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .form-buttons button[type="button"]:hover {
+    background-color: #da190b;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 0.9em;
+  }
+  
