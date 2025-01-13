@@ -1,11 +1,12 @@
-// src/components/HomePage.jsx
-
-import React, { useState, useEffect } from 'react';
+// src/component/HomePage.jsx
+import React, { useState, useEffect, useContext } from 'react';
 import axios from '../axiosConfig';
 import './HomePage.css';
 import RentalForm from './RentalForm';
+import { UserContext } from '../context/UserContext';
 
 function HomePage() {
+  const { user } = useContext(UserContext);
   const [brand, setBrand] = useState('');
   const [model, setModel] = useState('');
   const [cars, setCars] = useState([]);
@@ -29,7 +30,6 @@ function HomePage() {
     axios
       .get('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/car')
       .then((response) => {
-        console.log('API Response:', response.data);
         if (Array.isArray(response.data)) {
           const carsData = response.data
             .map((car) => ({
@@ -40,10 +40,9 @@ function HomePage() {
               properties: car.Properties || ['Automatic', 'Petrol'],
               description: car.description || 'No description.',
               image: car.image || 'default_car.jpg',
-              status: car.status || 'Available', 
+              status: car.status || 'Available',
             }))
-            .filter((car) => car.status.toLowerCase() === 'available'); 
-          console.log('Mapped Cars Data:', carsData);
+            .filter((car) => car.status.toLowerCase() === 'available');
           setCars(carsData);
           setFilteredCars(carsData);
         } else {
@@ -52,7 +51,6 @@ function HomePage() {
         setLoading(false);
       })
       .catch((err) => {
-        console.error('Error fetching cars:', err);
         setError('Failed to fetch car data.');
         setLoading(false);
       });
@@ -107,9 +105,10 @@ function HomePage() {
     }
   }
 
-  useEffect(() => { // eslint-disable-next-line react-hooks/exhaustive-deps
-    handleSearch(); // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedProperties]); // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    handleSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProperties]);
 
   function paginateCars() {
     const lastCarIndex = currentPage * carsPerPage;
@@ -134,7 +133,7 @@ function HomePage() {
   }
 
   return (
-    <div className="container">
+    <div className="home-page-container">
       <h1>Car Rental Service - Rent a Car</h1>
 
       <div className="search-bar">
@@ -183,11 +182,11 @@ function HomePage() {
                 alt={`${car.brand} ${car.model}`}
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
+                  e.target.src = '/data/image.jpg';
                 }}
               />
               <h2>
-                {car.name} {car.brand} ({car.year})
+                {car.model} {car.brand} ({car.year})
               </h2>
               <p>{car.description}</p>
               <p>Features: {car.properties.join(', ')}</p>

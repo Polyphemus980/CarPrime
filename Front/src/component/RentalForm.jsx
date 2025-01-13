@@ -1,9 +1,8 @@
-// src/components/RentalForm.jsx
-
+// src/component/RentalForm.jsx
 import React, { useState } from 'react';
 import axios from '../axiosConfig';
 import { toast } from 'react-toastify';
-import './RentalForm.css'; 
+import './RentalForm.css';
 
 function RentalForm({ car, onClose }) {
   const [rentForm, setRentForm] = useState({
@@ -51,19 +50,29 @@ function RentalForm({ car, onClose }) {
         StartDate: rentForm.startDate,
         EndDate: rentForm.endDate,
       };
-      const res = await axios.post(`https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/Car/${car.id}/rent`, rentData); 
+      const res = await axios.post(
+        `https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/Car/${car.id}/rent`,
+        rentData
+      );
 
       toast.success('Car rented successfully!', { position: 'top-right', autoClose: 5000 });
-      console.log('Received LeaseId:', res.data.LeaseId);
-      console.log('Received Message:', res.data.Message);
-
-      onClose(); 
+      onClose();
     } catch (error) {
       console.error('Error renting car:', error);
-      if (error.response && error.response.data && error.response.data.Message) {
-        toast.error(error.response.data.Message, { position: 'top-right', autoClose: 5000 });
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.Message
+      ) {
+        toast.error(error.response.data.Message, {
+          position: 'top-right',
+          autoClose: 5000,
+        });
       } else {
-        toast.error('Failed to rent car.', { position: 'top-right', autoClose: 5000 });
+        toast.error('Failed to rent car.', {
+          position: 'top-right',
+          autoClose: 5000,
+        });
       }
     } finally {
       setSubmitting(false);

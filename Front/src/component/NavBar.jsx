@@ -1,12 +1,11 @@
-// src/components/Navbar.jsx
-
+// src/component/NavBar.jsx
 import React, { useContext } from 'react';
 import { UserContext } from '../context/UserContext';
 import './NavBar.css';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-function Navbar() {
+function NavBar() {
   const { user, logout } = useContext(UserContext);
   const navigate = useNavigate();
 
@@ -25,11 +24,14 @@ function Navbar() {
         <h2>Car Rental Service - Car Prime</h2>
       </div>
       <div className="navbar-links">
+        <Link to="/HomeUser">
+          <button className="navbar-button">Home</button>
+        </Link>
         {user ? (
           <>
             <span className="navbar-user">Hello, {user.name || user.email}!</span>
             <Link to="/myrented">
-              <button className="navbar-button">My rented</button>
+              <button className="navbar-button">My Rented</button>
             </Link>
             <Link to="/rent">
               <button className="navbar-button">Rent Car</button>
@@ -58,4 +60,4 @@ function Navbar() {
   );
 }
 
-export default Navbar;
+export default NavBar;

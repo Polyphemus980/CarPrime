@@ -1,8 +1,7 @@
 // src/App.jsx
-
 import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './component/NavBar';
+import NavBar from './component/NavBar';
 import LoginForm from './component/LoginForm';
 import RegistrationForm from './component/RegistrationForm';
 import HomePage from './component/HomePage';
@@ -13,26 +12,31 @@ import { UserContext } from './context/UserContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import MyRented from './component/MyRented';
+import LandingPage from './component/LandingPage';
 
 function App() {
   const { user } = useContext(UserContext);
 
   return (
     <Router>
-      <Navbar />
+      <NavBar />
       <ToastContainer />
       <Routes>
         <Route
           path="/"
-          element={user ? <HomePage /> : <Navigate to="/login" replace />}
+          element={<LandingPage />}
+        />
+        <Route
+          path="/HomeUser"
+          element={user ? <HomePage /> : <Navigate to="/" replace />}
         />
         <Route
           path="/login"
-          element={!user ? <LoginForm /> : <Navigate to="/" replace />}
+          element={!user ? <LoginForm /> : <Navigate to="/login" replace />}
         />
         <Route
           path="/register"
-          element={!user ? <RegistrationForm /> : <Navigate to="/" replace />}
+          element={!user ? <RegistrationForm /> : <Navigate to="/HomeUser" replace />}
         />
         <Route
           path="/return"
@@ -41,7 +45,7 @@ function App() {
         <Route
           path="/worker"
           element={
-            user && user.isWorker ? <WorkerDashboard /> : <Navigate to="/" replace />
+            user && user.isWorker ? <WorkerDashboard /> : <Navigate to="/HomeUser" replace />
           }
         />
         <Route
@@ -50,11 +54,11 @@ function App() {
         />
         <Route
           path="/myrented"
-          element={user ? <MyRented /> : <Navigate to="/myrented" replace />}
+          element={user ? <MyRented /> : <Navigate to="/login" replace />}
         />
         <Route
           path="*"
-          element={<Navigate to={user ? "/" : "/login"} replace />}
+          element={<Navigate to={user ? "/HomeUser" : "/"} replace />}
         />
       </Routes>
     </Router>

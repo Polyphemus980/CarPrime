@@ -1,11 +1,10 @@
-// src/components/LoginForm.jsx
-
-import React, { useState, useContext, useEffect } from 'react';
+// src/component/LoginForm.jsx
+import React, { useState, useContext } from 'react';
 import './LoginForm.css';
 import { UserContext } from '../context/UserContext';
 import { useNavigate } from 'react-router-dom';
-import axios from '../axiosConfig';
 import { toast } from 'react-toastify';
+import { GoogleLogin } from '@react-oauth/google';
 
 function LoginForm() {
   const { login } = useContext(UserContext);
@@ -19,83 +18,7 @@ function LoginForm() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const specialWorkerEmail = 'jangaska00@gmail.com';
-
-  useEffect(() => {
-    const initializeGapi = () => {
-      if (window.gapi) {
-        window.gapi.load('auth2', () => {
-          window.gapi.auth2.init({
-            client_id: '847934116290-srh43sv05kgb7nctnfifoocekfaf8kqn.apps.googleusercontent.com',
-          }).then(() => {
-            renderGoogleSignInButton();
-          }).catch((error) => {
-            console.error('Error initializing Google Auth:', error);
-          });
-        });
-      } else {
-        console.error('GAPI not loaded');
-      }
-    };
-
-    const renderGoogleSignInButton = () => {
-      if (window.gapi && window.gapi.auth2) {
-        window.gapi.signin2.render('googleSignInButton', {
-          scope: 'profile email',
-          width: 240,
-          height: 50,
-          longtitle: true,
-          theme: 'dark',
-          onsuccess: onGoogleSignInSuccess,
-          onfailure: onGoogleSignInFailure,
-        });
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    initializeGapi(); // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-
-  const onGoogleSignInSuccess = (googleUser) => {
-    const idToken = googleUser.getAuthResponse().id_token;
-    console.log('Google idToken:', idToken);  
-
-    handleGoogleLogin(idToken);
-  };
-
-  const onGoogleSignInFailure = (error) => {
-    console.error('Google Sign-In Error:', error);
-    toast.error('Google Sign-In failed', { position: 'top-right', autoClose: 5000 });
-  };
-
-  const handleGoogleLogin = async (idToken) => {
-    setSubmitting(true);
-    try {
-      const res = await axios.post('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/register', { IdToken: idToken });
-
-      if (res.data.requiresAdditionalInfo) {
-        navigate(`/register?email=${res.data.email}`);
-      } else {
-        const isWorker = res.data.email.toLowerCase() === specialWorkerEmail;
-        const userData = {
-          token: res.data.Token,
-          name: res.data.name || res.data.email,
-          email: res.data.email,
-          isWorker,
-        };
-        login(userData);
-        navigate('/');
-        console.log('Received Token:', res.data.Token); 
-      }
-    } catch (error) {
-      console.error('Google Login error:', error);
-      toast.error('Google Login failed', { position: 'top-right', autoClose: 5000 });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleEmailLogin = async (e) => {
+  const handleEmailLogin = (e) => {
     e.preventDefault();
     const newErrors = {};
     const { email, password } = formData;
@@ -116,41 +39,49 @@ function LoginForm() {
     }
 
     setSubmitting(true);
-    try {
-      const res = await axios.post('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/register', { email, password });
+    // Bypass authentication and log in the user directly
+    const userData = {
+      token: 'dummy-token',
+      name: formData.email.split('@')[0],
+      email: formData.email,
+      isWorker: false, // Set to true if needed
+    };
+    login(userData);
+    toast.success('Logged in successfully!', { position: 'top-right', autoClose: 3000 });
+    navigate('/HomeUser');
+    setSubmitting(false);
+  };
 
-      if (res.data.requiresAdditionalInfo) {
-        navigate(`/register?email=${res.data.email}`);
-      } else {
-        const isWorker = email.toLowerCase() === specialWorkerEmail;
-        const userData = {
-          token: res.data.Token,
-          name: res.data.name || email,
-          email: email,
-          isWorker,
-        };
-        login(userData);
-        navigate('/');
-        console.log('Received Token:', res.data.Token);
-      }
-    } catch (error) {
-      console.error('Email Login error:', error);
-      toast.error('Login failed', { position: 'top-right', autoClose: 5000 });
-    } finally {
+  const handleGoogleLoginSuccess = (credentialResponse) => {
+    if (credentialResponse.credential) {
+      setSubmitting(true);
+      // Bypass authentication and log in the user directly
+      const userData = {
+        token: credentialResponse.credential,
+        name: 'Google User',
+        email: 'googleuser@example.com',
+        isWorker: false, // Set to true if needed
+      };
+      login(userData);
+      toast.success('Logged in with Google successfully!', { position: 'top-right', autoClose: 3000 });
+      navigate('/HomeUser');
       setSubmitting(false);
     }
+  };
+
+  const handleGoogleLoginFailure = (error) => {
+    console.error('Google Sign-In Error:', error);
+    toast.error('Google Sign-In failed', { position: 'top-right', autoClose: 5000 });
   };
 
   return (
     <div className="login-form-container">
       <h2>Log In</h2>
-      
-      {}
-      <div id="googleSignInButton"></div>
-      
+      <GoogleLogin
+        onSuccess={handleGoogleLoginSuccess}
+        onError={handleGoogleLoginFailure}
+      />
       <div className="separator">OR</div>
-      
-      {}
       <form onSubmit={handleEmailLogin} noValidate>
         <label htmlFor="email">
           Email:

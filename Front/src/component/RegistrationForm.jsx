@@ -1,5 +1,4 @@
-// src/components/RegistrationForm.jsx
-
+// src/component/RegistrationForm.jsx
 import React, { useState, useContext } from 'react';
 import './RegistrationForm.css';
 import { UserContext } from '../context/UserContext';
@@ -59,21 +58,20 @@ function RegistrationForm({ onSwitchToLogin }) {
     }
     setSubmitting(true);
 
-    // Create FormData object
-    const formDataToSend = new FormData();
-    formDataToSend.append('firstName', formData.firstName);
-    formDataToSend.append('lastName', formData.lastName);
-    formDataToSend.append('email', formData.email);
-    formDataToSend.append('birthdate', formData.birthdate); 
-    formDataToSend.append('licenceIssuedDate', formData.licenceIssuedDate); 
-    formDataToSend.append('country', formData.country);
-    formDataToSend.append('city', formData.city);
-    formDataToSend.append('address', formData.address);
+    const formDataToSend = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      birthdate: formData.birthdate, 
+      licenceIssuedDate: formData.licenceIssuedDate, 
+      country: formData.country,
+      city: formData.city,
+      address: formData.address,
+    };
 
     axios.post('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/register', formDataToSend)
       .then(res => {
         const { Token } = res.data;
-        console.log('Received Token:', Token); 
         const isWorker = formData.email.toLowerCase() === specialWorkerEmail;
         const userData = {
           token: Token,
@@ -82,11 +80,26 @@ function RegistrationForm({ onSwitchToLogin }) {
           isWorker,
         };
         login(userData);
-        navigate('/');
+        navigate('/HomeUser');
       })
       .catch(error => {
         console.error('Registration error:', error);
-        toast.error('Registration failed', { position: 'top-right', autoClose: 5000 });
+        if (error.response) {
+          toast.error(`Registration failed: ${error.response.data.Message || error.response.data}`, {
+            position: 'top-right',
+            autoClose: 5000,
+          });
+        } else if (error.request) {
+          toast.error('No response from the server. Please try again later.', {
+            position: 'top-right',
+            autoClose: 5000,
+          });
+        } else {
+          toast.error(`Error: ${error.message}`, {
+            position: 'top-right',
+            autoClose: 5000,
+          });
+        }
       })
       .finally(() => setSubmitting(false));
   };
