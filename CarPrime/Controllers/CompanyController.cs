@@ -111,4 +111,17 @@ public static class TaskExtensions
     {
         return @this.ContinueWith(task => task.IsCanceled || task.IsFaulted ? default : task.Result);
     }
+
+    public static ActionResult<TResult> Map<T, TResult>(this ActionResult<T> @this, Func<T, TResult> func)
+    {
+        return @this.Value != null 
+            ? new ActionResult<TResult>(func(@this.Value)) 
+            : new ActionResult<TResult>(@this.Result!);
+    }
+    public static async Task<ActionResult<TResult>> Map<T, TResult>(this ActionResult<T> @this, Func<T, Task<TResult>> func)
+    {
+        return @this.Value != null 
+            ? new ActionResult<TResult>(await func(@this.Value)) 
+            : new ActionResult<TResult>(@this.Result!);
+    }
 }

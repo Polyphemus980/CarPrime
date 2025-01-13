@@ -40,8 +40,9 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IRentalService, RentalService>();
 
 //CompaniesService
-builder.Services.AddSingleton<CompaniesService, CompaniesService>();
- 
+builder.Services.AddScoped<CompaniesService, CompaniesService>();
+builder.Services.AddScoped<CarPrimeService, CarPrimeService>();
+
 //Google authentication config
 var secretKey = builder.Configuration["Jwt:SecretKey"];
 builder.Services.AddAuthentication(options =>

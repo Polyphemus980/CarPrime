@@ -6,11 +6,11 @@ public sealed class CompaniesService
 {
     private readonly IReadOnlyDictionary<int, ICarCompany> _companies;
 
-    public CompaniesService()
+    public CompaniesService(CarPrimeService carPrimeService)
     {
         _companies = new Dictionary<int, ICarCompany>([
-            
-            //TODO kolejne implementacje ICarCompany
+            new KeyValuePair<int, ICarCompany>(0, new CarPrimeCompany(carPrimeService)),
+            // kolejne implementacje ICarCompany...
         ]);
     }
 
