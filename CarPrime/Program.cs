@@ -38,6 +38,9 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 //RentalService
 builder.Services.AddScoped<IRentalService, RentalService>();
+
+//CompaniesService
+builder.Services.AddSingleton<CompaniesService, CompaniesService>();
  
 //Google authentication config
 var secretKey = builder.Configuration["Jwt:SecretKey"];

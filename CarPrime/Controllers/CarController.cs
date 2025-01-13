@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using CarPrime.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -51,7 +50,7 @@ public class CarController : ControllerBase
         var frontCars = await _context.Cars
             .GroupJoin(_context.Leases, car => car.CarId, lease => lease.Offer.CarId, (car, leases) => new { car, leases })
             // dostępne są te samochody, dla których nie ma aktywnych wypożyczeń
-            .Select(arg => new { arg.car, status = arg.leases.All(lease => lease.EndedAt != null) ? CarStatus.Available : CarStatus.NotAvailable })
+            .Select(arg => new { arg.car, status = arg.leases.All(lease => lease.Status == LeaseStatus.Finished) ? CarStatus.Available : CarStatus.NotAvailable })
             .Select(arg => new FrontCar(arg.car.CarId, arg.car.Model.Brand, arg.car.Model.Name, arg.car.ManufactureYear.Year, arg.status))
             .ToListAsync();
         _logger.LogInformation("Cars got action called.");
