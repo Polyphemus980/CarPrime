@@ -24,11 +24,14 @@ public class RentController(
         var customer = await customerService.GetAuthenticatedCustomerAsync(User);
         if (customer == null)
             return Unauthorized();
-        var result = await rentalService.GetOfferAsCustomer(id, customer);
-        if (result is not OkObjectResult { Value: Offer offer }) 
-            return result;
         
-        return Ok(OfferDisplay.FromOffer(offer));
+        var offerResult = await carPrimeService.GetOffer(id, customer);
+        return offerResult switch
+        {
+            { Value: { } offer } => Ok(OfferDisplay.FromOffer(offer)),
+            { Result: { } result } => result,
+            _ => throw new Exception()
+        };
     }
 
     [HttpPost("/Offer/{id:int}/accept")]
@@ -37,13 +40,15 @@ public class RentController(
         var customer = await customerService.GetAuthenticatedCustomerAsync(User);
         if (customer == null)
             return Unauthorized();
-        var result = await rentalService.GetOfferAsCustomer(id, customer);
-        if (result is not OkObjectResult { Value: Offer offer })
-            return result;
         
-        var lease = await rentalService.AcceptOffer(offer);
+        var leaseResult = await carPrimeService.AcceptOffer(id, customer);
+        return leaseResult switch
+        {
+            { Value: { } lease } => Ok(lease.LeaseId),
+            { Result: { } result } => result,
+            _ => throw new Exception()
+        };
         
-        return Ok(lease.LeaseId);
     }
 
     [HttpGet("/Lease/{id:int}")]
@@ -52,26 +57,20 @@ public class RentController(
         var customer = await customerService.GetAuthenticatedCustomerAsync(User);
         if (customer == null)
             return Unauthorized();
-        var lease = await context.Leases.FindAsync(id);
-        if (lease == null)
-            return NotFound();
-        if (lease.LeaserId != customer.CustomerId)
-            return Unauthorized();
-        return Ok(LeaseDisplay.FromLease(lease));
+        
+        var leaseResult = await carPrimeService.GetLease(id, customer);
+        return leaseResult switch
+        {
+            { Value: { } lease } => Ok(LeaseDisplay.FromLease(lease)),
+            { Result: { } result } => result,
+            _ => throw new Exception()
+        };
     }
 
-    [HttpDelete("/Lease/{id:Int}")]
+    [HttpDelete("/Lease/{leaseId:int}")]
     public async Task<IActionResult> RequestEndLease([FromRoute] int leaseId)
     {
-        var lease = await context.Leases.Where(lease => lease.LeaseId == leaseId).FirstOrDefaultAsync();
-        if (lease == null)
-        {
-            return NotFound($"No lease with id {leaseId} exists");
-        }
-
-        lease.Status = LeaseStatus.WaitingForEmployeeApproval;
-        await context.SaveChangesAsync();
-        return Ok("End lease process started");
+        return await carPrimeService.RequestEndLease(leaseId);
     }
     
     [HttpPost("/Lease/{id:int}/review")]

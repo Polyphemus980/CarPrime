@@ -18,14 +18,16 @@ public class CarController : ControllerBase
     private readonly IEmailService _emailService;
     private readonly ICustomerService _customerService;
     private readonly IRentalService _rentalService;
+    private readonly CarPrimeService _carPrimeService;
 
-    public CarController(ApplicationDbContext context, ILogger<CarController> logger, IEmailService emailService, ICustomerService customerService,IRentalService rentalService)
+    public CarController(ApplicationDbContext context, ILogger<CarController> logger, IEmailService emailService, ICustomerService customerService,IRentalService rentalService, CarPrimeService carPrimeService)
     {
         _context = context;
         _logger = logger;
         _emailService = emailService;
         _customerService = customerService;
         _rentalService = rentalService;
+        _carPrimeService = carPrimeService;
     }
     
     [HttpPost]
@@ -46,14 +48,7 @@ public class CarController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetCars()
     {
-        _logger.LogInformation("Get action called.");
-        var frontCars = await _context.Cars
-            .GroupJoin(_context.Leases, car => car.CarId, lease => lease.Offer.CarId, (car, leases) => new { car, leases })
-            // dostępne są te samochody, dla których nie ma aktywnych wypożyczeń
-            .Select(arg => new { arg.car, status = arg.leases.All(lease => lease.Status == LeaseStatus.Finished) ? CarStatus.Available : CarStatus.NotAvailable })
-            .Select(arg => new FrontCar(arg.car.CarId, arg.car.Model.Brand, arg.car.Model.Name, arg.car.ManufactureYear.Year, arg.status))
-            .ToListAsync();
-        _logger.LogInformation("Cars got action called.");
+        var frontCars = await _carPrimeService.GetCars();
         return Ok(frontCars);
     }
     
@@ -71,7 +66,7 @@ public class CarController : ControllerBase
         _logger.LogInformation("Customer {customer} wants to rent car wth id {id}", customer, id);
         
         // company chyba też będzie musiało być przekazywane w requeście; lub jakiś sposób identyfikacji z id
-        var company = await DefaultCompany();
+        var company = await _carPrimeService.GetCompany();
 
         var offer = _context.Offers.FirstOrDefault(offer => offer.CarId == car.CarId);
         if (offer != null)
@@ -94,135 +89,35 @@ public class CarController : ControllerBase
         return Ok("Car rented successfully."); 
     }
 
-    //tymczasowo, dopóki nie mamy Company
-    private async Task<Company> DefaultCompany()
-    {
-        var company = await _context.Companies.FirstOrDefaultAsync(); 
-        if (company == null)
-        {
-            company = new Company
-            {
-                Name = "Default Company",
-                ApiUrl = "localhost:2137",
-            };
-            await _context.Companies.AddAsync(company);
-        }
-        return company;
-    }
    
     [HttpGet("/Car/{id:int}/offer")]
     [Authorize]
     public async Task<IActionResult> RequestOffer([FromRoute] int id)
     {
 
-        var car = await _context.Cars.FindAsync(id);
-
-        if (car == null)
-
-            return NotFound("Car not found");
-
-        var carModel = await _context.CarModels.FindAsync(car.ModelId);
-
-        if (carModel == null) 
-
-            throw new Exception("Invalid car in DB. Car model not found");
-
         var customer = await _customerService.GetAuthenticatedCustomerAsync(User);
-
         if (customer == null)
-
             return Challenge();
 
-        var company = await DefaultCompany();
-
-        
-
-        var offer = await _rentalService.CreateOffer(car, customer, company);
-
-        _logger.LogInformation("New offer created: {offer}", offer);
-
-        var message = $"""
-
-                       Hello {customer.FirstName} {customer.LastName},
-
-                       
-
-                       
-
-                       Here are the details for the offer you requested:
-
-                       
-
-                       Customer Data:
-
-                           First Name:         {customer.FirstName}
-
-                           Last Name:          {customer.LastName}
-
-                           Email:              {customer.Email}
-
-                           Birth Date:         {customer.Birthdate:d}
-
-                           License Issue Date: {customer.LicenceIssuedDate:d}
-
-                           Country:            {customer.Country}
-
-                           City:               {customer.City}
-
-                           Address:            {customer.Address}
-
-                       Car Data:
-
-                           Brand:              {carModel.Brand}
-
-                           Model:              {carModel.Name}
-
-                           Manufacture Year:   {car.ManufactureYear.Year}
-
-                           Details:            {"" /*TODO*/}
-
-                           
-
-                       Offer Details:
-
-                           Insurance Price:    {offer.InsurancePrize}
-
-                           Rent Price:         {offer.RentPrize}
-
-                           Expiration Date:    {(offer.CreatedAt + RentalService.OfferExpirationTime):g}
-
-                        
-
-                           
-
-                       To accept or decline the offer, visit {"<TODO>" /*TODO link do strony*/}
-
-                       
-
-                       Sincerely,
-
-                       CarPrime Team
-
-                       """;
-
-        var subject = $"Offer for {carModel.Brand} {carModel.Name} ({car.ManufactureYear.Year})";
-
-        await _emailService.SendEmailAsync(customer.Email, subject, message);
-
-        _logger.LogInformation("email sent to {customer.Email}", customer.Email);
-
-        return Ok(offer.OfferId);
-
+        var offerResult = await _carPrimeService.RequestOffer(id, customer);
+        return offerResult switch
+        {
+            { Value: { } offer } => Ok(offer.OfferId),
+            { Result: { } result } => result,
+            _ => throw new Exception()
+        };
     }
 
     [HttpGet("/Car/{id:int}")]
     public async Task<IActionResult> GetCarById([FromRoute] int id)
     {
-        _logger.LogInformation("Get action called with id {id}.", id);
-        var car = await _context.Cars.FindAsync(id);
-        if (car == null)
-            return NotFound();
-        return Ok(car);
+        var carResult = await _carPrimeService.GetCarById(id);
+        return carResult switch
+        {
+            { Value: { } car } => Ok(car),
+            { Result: { } result } => result,
+            _ => throw new Exception()
+        };
     }
 
     [HttpGet("/Car/rented")]

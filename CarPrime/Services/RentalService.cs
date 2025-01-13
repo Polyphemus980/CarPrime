@@ -6,7 +6,7 @@ namespace CarPrime.Services;
 
 public class RentalService(ApplicationDbContext context) : IRentalService
 {
-    public async Task<IActionResult> GetOfferAsCustomer(int offerId, Customer customer)
+    public async Task<ActionResult<Offer>> GetOfferAsCustomer(int offerId, Customer customer)
     {
         var offer = await context.Offers.FindAsync(offerId);
         if (offer == null)
@@ -16,7 +16,7 @@ public class RentalService(ApplicationDbContext context) : IRentalService
         if (offer.IsDeleted)
             return new NotFoundObjectResult("Offer deleted");
         
-        return new OkObjectResult(offer);
+        return offer;
     }
     
     public async Task<Offer> CreateOffer(Car car, Customer customer, Company company)
