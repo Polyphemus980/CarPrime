@@ -66,10 +66,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// CORS should be applied before MapControllers and UseAuthentication
+app.UseCors("AllowAll");
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.UseCors("AllowAll");
 app.Run();
