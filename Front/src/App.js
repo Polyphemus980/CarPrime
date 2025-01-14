@@ -17,7 +17,7 @@ import './styles/App.css';
 function App() {
   return (
     <UserProvider>
-      <GoogleOAuthProvider clientId="847934116290-srh43sv05kgb7nctnfifoocekfaf8kqn.apps.googleusercontent.com">
+      <GoogleOAuthProvider clientId="847934116290-srh43sv05kgb7nctnfifoocekfaf8kqn.apps.googleusercontent.com" referrerPolicy="strict-origin-when-cross-origin">
         <Router>
           <Navbar />
           

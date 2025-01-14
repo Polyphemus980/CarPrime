@@ -45,12 +45,6 @@ function LoginForm() {
         onSuccess={handleGoogleLoginSuccess}
         onError={handleGoogleLoginFailure}
       />
-      <div className="separator">OR</div>
-      {/* 
-        If email/password login is not implemented on backend,
-        consider removing or disabling the form.
-        Uncomment the following block if you plan to implement it.
-      */}
       {false && (
         <form /* onSubmit={handleEmailLogin} */ noValidate>
           {/* Email and Password Fields */}
