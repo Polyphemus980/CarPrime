@@ -18,8 +18,9 @@ public class RentControllerTests
     private readonly Mock<ILogger<RentController>> _mockLogger;
     private readonly Mock<IBlobService> _mockBlobService;
     private readonly ApplicationDbContext _context;
+    private readonly Mock<IRentalService> _rentalService;
     private readonly RentController _controller;
-
+    private readonly Mock<IEmailService> _emailService;
     public RentControllerTests()
     {
         var databaseName = Guid.NewGuid().ToString();
@@ -35,13 +36,16 @@ public class RentControllerTests
         _mockRentalService = new Mock<IRentalService>();
         _mockCustomerService = new Mock<ICustomerService>();
         _mockLogger = new Mock<ILogger<RentController>>();
+         var mockLogger2 = new Mock<ILogger<CarPrimeService>>();
         _mockBlobService = new Mock<IBlobService>();
-        
+        _rentalService = new Mock<IRentalService>();
+        _emailService = new Mock<IEmailService>();
         _controller = new RentController(
             _context,
             _mockRentalService.Object,
             _mockCustomerService.Object,
             _mockLogger.Object,
+            new CarPrimeService(_context,_emailService.Object,_rentalService.Object,mockLogger2.Object),
             _mockBlobService.Object
         );
     }
