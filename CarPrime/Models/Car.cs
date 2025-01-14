@@ -10,7 +10,7 @@ public class Car
     [ForeignKey("ModelId")]
     [Required] public CarModel Model { get; set; }
     [Required] public DateTime ManufactureYear { get; set; }
-    public Offer Offer { get; set; }
-    
-    //TODO add image url to car
+    public Offer? Offer { get; set; }
+
+    public String? ImageUrl { get; set; }
 }

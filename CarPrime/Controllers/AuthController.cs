@@ -61,7 +61,7 @@ public class AuthController : ControllerBase
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:MyDomainUrl"],
-            audience: "https://ashy-field-0c4ba1803.5.azurestaticapps.net",
+            //audience: "https://ashy-field-0c4ba1803.5.azurestaticapps.net",
             claims: claims,
             expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: creds);

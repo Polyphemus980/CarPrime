@@ -1,5 +1,4 @@
-// src/components/LoginPage.jsx
-
+// src/component/LoginPage.jsx
 import React, { useState } from 'react';
 import LoginForm from './LoginForm';
 import RegistrationForm from './RegistrationForm';

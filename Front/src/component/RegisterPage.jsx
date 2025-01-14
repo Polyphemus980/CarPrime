@@ -1,11 +1,14 @@
 // src/component/RegistrationForm.jsx
-
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import './RegistrationForm.css';
 import { toast } from 'react-toastify';
+import { UserContext } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom';
 
-function RegistrationForm({ onSwitchToLogin }) {
+function RegistrationForm() {
+  const { login } = useContext(UserContext);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -54,21 +57,59 @@ function RegistrationForm({ onSwitchToLogin }) {
     if (Object.keys(validationErrors).length > 0) return;
     setSubmitting(true);
     try {
-      const API_URL = './api/Auth/register';
-      const response = await axios.post(API_URL, formData);
-      const token = response.data.Token;
-      toast.success('Registration successful!', {
-        position: 'top-right',
-        autoClose: 3000,
+      const API_URL = 'https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/register';
+      const data = new FormData();
+      data.append('FirstName', formData.firstName);
+      data.append('LastName', formData.lastName);
+      data.append('Email', formData.email);
+      data.append('Birthdate', formData.birthdate);
+      data.append('LicenceIssuedDate', formData.licenceIssuedDate);
+      data.append('Country', formData.country);
+      data.append('City', formData.city);
+      data.append('Address', formData.address);
+
+      const response = await axios.post(API_URL, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      onSwitchToLogin();
-    } catch (error) {
-      console.error('Registration error:', error);
-      if (error.response) {
-        toast.error(`Registration failed: ${error.response.data.Message || error.response.data}`, {
+
+      if (response.data.Token) {
+        const token = response.data.Token;
+        toast.success('Registration successful!', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
+        login(token);
+        navigate('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/');
+      } else {
+        toast.info('User already exists. Please log in.', {
           position: 'top-right',
           autoClose: 5000,
         });
+        navigate('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      if (error.response) {
+        if (error.response.status === 409) {
+          toast.info('User already exists. Please log in.', {
+            position: 'top-right',
+            autoClose: 5000,
+          });
+          navigate('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/');
+        } else if (error.response.data.requiresAdditionalInfo) {
+          toast.info(`Additional info required for email: ${error.response.data.email}`, {
+            position: 'top-right',
+            autoClose: 5000,
+          });
+          navigate('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/');
+        } else {
+          toast.error(`Registration failed: ${error.response.data.Message || error.response.data}`, {
+            position: 'top-right',
+            autoClose: 5000,
+          });
+        }
       } else if (error.request) {
         toast.error('No response from the server. Please try again later.', {
           position: 'top-right',
@@ -206,7 +247,7 @@ function RegistrationForm({ onSwitchToLogin }) {
 
       <p>
         Already have an account?{' '}
-        <button className="switch-button" onClick={onSwitchToLogin}>
+        <button className="switch-button" onClick={() => navigate('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/')}>
           Log In
         </button>
       </p>
