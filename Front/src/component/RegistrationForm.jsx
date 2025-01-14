@@ -1,23 +1,19 @@
 // src/component/RegistrationForm.jsx
-import React, { useState, useContext } from 'react';
-import './RegistrationForm.css';
-import { UserContext } from '../context/UserContext';
-import { useNavigate, useLocation } from 'react-router-dom';
-import axios from '../axiosConfig';
-import { toast } from 'react-toastify';
 
-function RegistrationForm({ onSwitchToLogin }) {
+import React, { useState, useContext } from 'react';
+import axios from 'axios';
+import './RegistrationForm.css';
+import { toast } from 'react-toastify';
+import { UserContext } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom';
+
+function RegistrationForm() {
   const { login } = useContext(UserContext);
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const queryParams = new URLSearchParams(location.search);
-  const emailFromLogin = queryParams.get('email') || '';
-
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: emailFromLogin,
+    email: '',
     birthdate: '',
     licenceIssuedDate: '',
     country: '',
@@ -28,7 +24,13 @@ function RegistrationForm({ onSwitchToLogin }) {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const specialWorkerEmail = 'jangaska00@gmail.com';
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
   const validate = () => {
     const newErrors = {};
@@ -49,65 +51,85 @@ function RegistrationForm({ onSwitchToLogin }) {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0) {
-      return;
-    }
+    if (Object.keys(validationErrors).length > 0) return;
     setSubmitting(true);
+    try {
+      const API_URL = 'https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/register';
+      const data = new FormData();
+      data.append('FirstName', formData.firstName);
+      data.append('LastName', formData.lastName);
+      data.append('Email', formData.email);
+      data.append('Birthdate', formData.birthdate);
+      data.append('LicenceIssuedDate', formData.licenceIssuedDate);
+      data.append('Country', formData.country);
+      data.append('City', formData.city);
+      data.append('Address', formData.address);
 
-    const formDataToSend = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      birthdate: formData.birthdate, 
-      licenceIssuedDate: formData.licenceIssuedDate, 
-      country: formData.country,
-      city: formData.city,
-      address: formData.address,
-    };
+      const response = await axios.post(API_URL, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-    axios.post('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/Auth/register', formDataToSend)
-      .then(res => {
-        const { Token } = res.data;
-        const isWorker = formData.email.toLowerCase() === specialWorkerEmail;
-        const userData = {
-          token: Token,
-          name: `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          isWorker,
-        };
-        login(userData);
-        navigate('/HomeUser');
-      })
-      .catch(error => {
-        console.error('Registration error:', error);
-        if (error.response) {
+      if (response.data.Token) {
+        const token = response.data.Token;
+        toast.success('Registration successful!', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
+        login(token);
+        navigate('/login');
+      } else {
+        toast.info('User already exists. Please log in.', {
+          position: 'top-right',
+          autoClose: 5000,
+        });
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      if (error.response) {
+        if (error.response.status === 409) {
+          toast.info('User already exists. Please log in.', {
+            position: 'top-right',
+            autoClose: 5000,
+          });
+          navigate('/login');
+        } else if (error.response.data.requiresAdditionalInfo) {
+          toast.info(`Additional info required for email: ${error.response.data.email}`, {
+            position: 'top-right',
+            autoClose: 5000,
+          });
+          navigate('/login');
+        } else {
           toast.error(`Registration failed: ${error.response.data.Message || error.response.data}`, {
             position: 'top-right',
             autoClose: 5000,
           });
-        } else if (error.request) {
-          toast.error('No response from the server. Please try again later.', {
-            position: 'top-right',
-            autoClose: 5000,
-          });
-        } else {
-          toast.error(`Error: ${error.message}`, {
-            position: 'top-right',
-            autoClose: 5000,
-          });
         }
-      })
-      .finally(() => setSubmitting(false));
+      } else if (error.request) {
+        toast.error('No response from the server. Please try again later.', {
+          position: 'top-right',
+          autoClose: 5000,
+        });
+      } else {
+        toast.error(`Error: ${error.message}`, {
+          position: 'top-right',
+          autoClose: 5000,
+        });
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <div className="registration-form-container">
       <h2>Create an Account</h2>
-      <div className="separator">OR</div>
       <form onSubmit={handleSubmit} noValidate>
         <label htmlFor="firstName">
           First Name:
@@ -117,7 +139,7 @@ function RegistrationForm({ onSwitchToLogin }) {
             name="firstName"
             placeholder="Enter your first name"
             value={formData.firstName}
-            onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+            onChange={handleChange}
             required
           />
           {errors.firstName && <span className="error-message">{errors.firstName}</span>}
@@ -131,7 +153,7 @@ function RegistrationForm({ onSwitchToLogin }) {
             name="lastName"
             placeholder="Enter your last name"
             value={formData.lastName}
-            onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+            onChange={handleChange}
             required
           />
           {errors.lastName && <span className="error-message">{errors.lastName}</span>}
@@ -145,9 +167,8 @@ function RegistrationForm({ onSwitchToLogin }) {
             name="email"
             placeholder="Enter your email address"
             value={formData.email}
-            onChange={(e) => setFormData({...formData, email: e.target.value})}
+            onChange={handleChange}
             required
-            disabled={emailFromLogin !== ''}
           />
           {errors.email && <span className="error-message">{errors.email}</span>}
         </label>
@@ -159,7 +180,7 @@ function RegistrationForm({ onSwitchToLogin }) {
             id="birthdate"
             name="birthdate"
             value={formData.birthdate}
-            onChange={(e) => setFormData({...formData, birthdate: e.target.value})}
+            onChange={handleChange}
             required
           />
           {errors.birthdate && <span className="error-message">{errors.birthdate}</span>}
@@ -172,7 +193,7 @@ function RegistrationForm({ onSwitchToLogin }) {
             id="licenceIssuedDate"
             name="licenceIssuedDate"
             value={formData.licenceIssuedDate}
-            onChange={(e) => setFormData({...formData, licenceIssuedDate: e.target.value})}
+            onChange={handleChange}
             required
           />
           {errors.licenceIssuedDate && <span className="error-message">{errors.licenceIssuedDate}</span>}
@@ -186,7 +207,7 @@ function RegistrationForm({ onSwitchToLogin }) {
             name="country"
             placeholder="Enter your country"
             value={formData.country}
-            onChange={(e) => setFormData({...formData, country: e.target.value})}
+            onChange={handleChange}
             required
           />
           {errors.country && <span className="error-message">{errors.country}</span>}
@@ -200,7 +221,7 @@ function RegistrationForm({ onSwitchToLogin }) {
             name="city"
             placeholder="Enter your city"
             value={formData.city}
-            onChange={(e) => setFormData({...formData, city: e.target.value})}
+            onChange={handleChange}
             required
           />
           {errors.city && <span className="error-message">{errors.city}</span>}
@@ -214,7 +235,7 @@ function RegistrationForm({ onSwitchToLogin }) {
             name="address"
             placeholder="Enter your address"
             value={formData.address}
-            onChange={(e) => setFormData({...formData, address: e.target.value})}
+            onChange={handleChange}
             required
           />
           {errors.address && <span className="error-message">{errors.address}</span>}
@@ -227,7 +248,7 @@ function RegistrationForm({ onSwitchToLogin }) {
 
       <p>
         Already have an account?{' '}
-        <button className="switch-button" onClick={onSwitchToLogin}>
+        <button className="switch-button" onClick={() => navigate('/login')}>
           Log In
         </button>
       </p>

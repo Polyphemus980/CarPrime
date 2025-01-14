@@ -1,71 +1,35 @@
 // src/component/LoginForm.jsx
-import React, { useState, useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import './LoginForm.css';
 import { UserContext } from '../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
+import axiosInstance from '../axiosConfig';
 
 function LoginForm() {
   const { login } = useContext(UserContext);
   const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-
   const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState({});
 
-  const handleEmailLogin = (e) => {
-    e.preventDefault();
-    const newErrors = {};
-    const { email, password } = formData;
-
-    if (!email.trim()) {
-      newErrors.email = 'Email is required.';
-    } else if (
-      !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)
-    ) {
-      newErrors.email = 'Invalid email address.';
-    }
-    if (!password) {
-      newErrors.password = 'Password is required.';
-    }
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) {
-      return;
-    }
-
-    setSubmitting(true);
-    // Bypass authentication and log in the user directly
-    const userData = {
-      token: 'dummy-token',
-      name: formData.email.split('@')[0],
-      email: formData.email,
-      isWorker: false, // Set to true if needed
-    };
-    login(userData);
-    toast.success('Logged in successfully!', { position: 'top-right', autoClose: 3000 });
-    navigate('/HomeUser');
-    setSubmitting(false);
-  };
-
-  const handleGoogleLoginSuccess = (credentialResponse) => {
+  const handleGoogleLoginSuccess = async (credentialResponse) => {
     if (credentialResponse.credential) {
       setSubmitting(true);
-      // Bypass authentication and log in the user directly
-      const userData = {
-        token: credentialResponse.credential,
-        name: 'Google User',
-        email: 'googleuser@example.com',
-        isWorker: false, // Set to true if needed
-      };
-      login(userData);
-      toast.success('Logged in with Google successfully!', { position: 'top-right', autoClose: 3000 });
-      navigate('/HomeUser');
-      setSubmitting(false);
+      try {
+        const response = await axiosInstance.post('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/auth/authenticate', {
+          IdToken: credentialResponse.credential,
+        });
+
+        const { Token } = response.data;
+        login(Token);
+        toast.success('Logged in with Google successfully!', { position: 'top-right', autoClose: 3000 });
+        navigate('/');
+      } catch (error) {
+        console.error('Google Authentication error:', error);
+        toast.error('Google Sign-In failed.', { position: 'top-right', autoClose: 5000 });
+      } finally {
+        setSubmitting(false);
+      }
     }
   };
 
@@ -82,39 +46,17 @@ function LoginForm() {
         onError={handleGoogleLoginFailure}
       />
       <div className="separator">OR</div>
-      <form onSubmit={handleEmailLogin} noValidate>
-        <label htmlFor="email">
-          Email:
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="Enter your email address"
-            value={formData.email}
-            onChange={(e) => setFormData({...formData, email: e.target.value})}
-            required
-          />
-          {errors.email && <span className="error-message">{errors.email}</span>}
-        </label>
-
-        <label htmlFor="password">
-          Password:
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Enter your password"
-            value={formData.password}
-            onChange={(e) => setFormData({...formData, password: e.target.value})}
-            required
-          />
-          {errors.password && <span className="error-message">{errors.password}</span>}
-        </label>
-
-        <button type="submit" disabled={submitting}>
-          {submitting ? 'Logging In...' : 'Log In'}
-        </button>
-      </form>
+      {/* 
+        If email/password login is not implemented on backend,
+        consider removing or disabling the form.
+        Uncomment the following block if you plan to implement it.
+      */}
+      {false && (
+        <form /* onSubmit={handleEmailLogin} */ noValidate>
+          {/* Email and Password Fields */}
+          {/* Implement when backend supports email/password authentication */}
+        </form>
+      )}
     </div>
   );
 }

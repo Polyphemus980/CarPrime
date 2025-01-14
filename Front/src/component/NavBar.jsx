@@ -26,13 +26,13 @@ function NavBar() {
       <div className="navbar-links">
         <button
           className="navbar-button"
-          onClick={() => navigate('/HomeUser')}
+          onClick={() => navigate('/')}
         >
           Home
         </button>
         {user ? (
           <>
-            <span className="navbar-user">Hello, {user.name || user.email}!</span>
+            <span className="navbar-user">Hello, {user.email}!</span>
             <button
               className="navbar-button"
               onClick={() => navigate('/myrented')}
