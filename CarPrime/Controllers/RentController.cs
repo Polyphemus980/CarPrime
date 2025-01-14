@@ -14,6 +14,7 @@ public class RentController(
     IRentalService rentalService,
     ICustomerService customerService,
     ILogger<RentController> logger,
+    CarPrimeService carPrimeService,
     IBlobService blobService
 ) : ControllerBase
 {
