@@ -1,12 +1,11 @@
-// src/components/Navbar.jsx
-
+// src/component/NavBar.jsx
 import React, { useContext } from 'react';
 import { UserContext } from '../context/UserContext';
 import './NavBar.css';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-function Navbar() {
+function NavBar() {
   const { user, logout } = useContext(UserContext);
   const navigate = useNavigate();
 
@@ -25,30 +24,54 @@ function Navbar() {
         <h2>Car Rental Service - Car Prime</h2>
       </div>
       <div className="navbar-links">
+        <button
+          className="navbar-button"
+          onClick={() => navigate('/')}
+        >
+          Home
+        </button>
         {user ? (
           <>
-            <span className="navbar-user">Hello, {user.name || user.email}!</span>
-            <Link to="/myrented">
-              <button className="navbar-button">My rented</button>
-            </Link>
-            <Link to="/rent">
-              <button className="navbar-button">Rent Car</button>
-            </Link>
+            <span className="navbar-user">Hello, {user.email}!</span>
+            <button
+              className="navbar-button"
+              onClick={() => navigate('/myrented')}
+            >
+              My Rented
+            </button>
+            <button
+              className="navbar-button"
+              onClick={() => navigate('/rent')}
+            >
+              Rent Car
+            </button>
             {user.isWorker && (
-              <Link to="/worker">
-                <button className="navbar-button">Accept Returns - Worker</button>
-              </Link>
+              <button
+                className="navbar-button"
+                onClick={() => navigate('/worker')}
+              >
+                Accept Returns - Worker
+              </button>
             )}
-            <button className="navbar-button" onClick={handleLogout}>
+            <button
+              className="navbar-button"
+              onClick={handleLogout}
+            >
               Logout
             </button>
           </>
         ) : (
           <>
-            <button className="navbar-button" onClick={() => navigate('/login')}>
+            <button
+              className="navbar-button"
+              onClick={() => navigate('/login')}
+            >
               Login
             </button>
-            <button className="navbar-button" onClick={() => navigate('/register')}>
+            <button
+              className="navbar-button"
+              onClick={() => navigate('/register')}
+            >
               Register
             </button>
           </>
@@ -58,4 +81,4 @@ function Navbar() {
   );
 }
 
-export default Navbar;
+export default NavBar;

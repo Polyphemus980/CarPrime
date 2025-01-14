@@ -1,0 +1,21 @@
+/* src/component/LandingPage.css */
+.landing-page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+    text-align: center;
+  }
+  
+  .landing-buttons {
+    margin-top: 20px;
+  }
+  
+  .landing-buttons button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  

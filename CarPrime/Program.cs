@@ -72,11 +72,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.UseCors("AllowAll");
-//
-// if (app.Environment.IsDevelopment())
-// {
-//     using var scope = app.Services.CreateScope();
-//     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-//     await dbContext.SeedDb();
-// }
+
+if (app.Environment.IsDevelopment())
+{
+    await app.Services.GetRequiredService<ApplicationDbContext>().SeedDb();
+}
 app.Run();
