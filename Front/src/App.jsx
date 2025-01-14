@@ -50,11 +50,11 @@ function App() {
         />
         <Route
           path="/rent"
-          element={user ? <RentCar /> : <Navigate to="/login" replace />}
+          element={user ? <RentCar /> : <Navigate to="/rent" replace />}
         />
         <Route
           path="/myrented"
-          element={user ? <MyRented /> : <Navigate to="/login" replace />}
+          element={user ? <MyRented /> : <Navigate to="/myrented" replace />}
         />
         <Route
           path="*"

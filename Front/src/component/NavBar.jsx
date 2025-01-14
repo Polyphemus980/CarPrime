@@ -2,7 +2,7 @@
 import React, { useContext } from 'react';
 import { UserContext } from '../context/UserContext';
 import './NavBar.css';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 function NavBar() {
@@ -24,33 +24,54 @@ function NavBar() {
         <h2>Car Rental Service - Car Prime</h2>
       </div>
       <div className="navbar-links">
-        <Link to="/HomeUser">
-          <button className="navbar-button">Home</button>
-        </Link>
+        <button
+          className="navbar-button"
+          onClick={() => navigate('/HomeUser')}
+        >
+          Home
+        </button>
         {user ? (
           <>
             <span className="navbar-user">Hello, {user.name || user.email}!</span>
-            <Link to="/myrented">
-              <button className="navbar-button">My Rented</button>
-            </Link>
-            <Link to="/rent">
-              <button className="navbar-button">Rent Car</button>
-            </Link>
+            <button
+              className="navbar-button"
+              onClick={() => navigate('/myrented')}
+            >
+              My Rented
+            </button>
+            <button
+              className="navbar-button"
+              onClick={() => navigate('/rent')}
+            >
+              Rent Car
+            </button>
             {user.isWorker && (
-              <Link to="/worker">
-                <button className="navbar-button">Accept Returns - Worker</button>
-              </Link>
+              <button
+                className="navbar-button"
+                onClick={() => navigate('/worker')}
+              >
+                Accept Returns - Worker
+              </button>
             )}
-            <button className="navbar-button" onClick={handleLogout}>
+            <button
+              className="navbar-button"
+              onClick={handleLogout}
+            >
               Logout
             </button>
           </>
         ) : (
           <>
-            <button className="navbar-button" onClick={() => navigate('/login')}>
+            <button
+              className="navbar-button"
+              onClick={() => navigate('/login')}
+            >
               Login
             </button>
-            <button className="navbar-button" onClick={() => navigate('/register')}>
+            <button
+              className="navbar-button"
+              onClick={() => navigate('/register')}
+            >
               Register
             </button>
           </>

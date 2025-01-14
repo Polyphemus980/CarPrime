@@ -91,10 +91,6 @@ function RentCar() {
       );
 
       toast.success('Car rented successfully!', { position: 'top-right', autoClose: 5000 });
-      // Optionally, you can log LeaseId and Message or handle them as needed
-      // console.log('Received LeaseId:', res.data.LeaseId);
-      // console.log('Received Message:', res.data.Message);
-
       fetchCars();
       setRentingCarId(null);
     } catch (error) {
