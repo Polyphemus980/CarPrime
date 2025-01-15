@@ -27,6 +27,7 @@ export function UserProvider({ children }) {
 
   const login = (token) => {
     try {
+      console.log(token)
       const decoded = jwtDecode(token);
       const email = decoded.sub;
       const isWorker = email === 'jangaska00@gmail.com';

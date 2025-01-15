@@ -61,14 +61,14 @@ builder.Services.AddAuthentication(options =>
 });
 var app = builder.Build();
 
+// CORS should be applied before MapControllers and UseAuthentication and Swagger ig
+app.UseCors("AllowAll");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-// CORS should be applied before MapControllers and UseAuthentication
-app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

@@ -28,7 +28,7 @@ function HomePage() {
   function fetchAvailableCars() {
     setLoading(true);
     axios
-      .get('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/car')
+      .get('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/Company/All/Car/')
       .then((response) => {
         if (Array.isArray(response.data)) {
           const carsData = response.data

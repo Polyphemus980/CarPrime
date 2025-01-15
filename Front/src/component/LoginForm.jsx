@@ -16,12 +16,11 @@ function LoginForm() {
     if (credentialResponse.credential) {
       setSubmitting(true);
       try {
-        const response = await axiosInstance.post('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/auth/authenticate', {
+        const response = await axiosInstance.post('https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/api/auth/authenticate', {
           IdToken: credentialResponse.credential,
         });
-
-        const { Token } = response.data;
-        login(Token);
+        const { token } = response.data;
+        login(token);
         toast.success('Logged in with Google successfully!', { position: 'top-right', autoClose: 3000 });
         navigate('/');
       } catch (error) {

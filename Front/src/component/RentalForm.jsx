@@ -50,9 +50,10 @@ function RentalForm({ car, onClose }) {
         StartDate: rentForm.startDate,
         EndDate: rentForm.endDate,
       };
-      const res = await axios.post(
-        `https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/Car/${car.id}/rent`,
-        rentData
+      const res = await axios.get(
+        `https://carprimeapi-cddtdnh9bbdqgzex.polandcentral-01.azurewebsites.net/car/${car.id}/offer`,
+        rentData 
+
       );
 
       toast.success('Car rented successfully!', { position: 'top-right', autoClose: 5000 });
